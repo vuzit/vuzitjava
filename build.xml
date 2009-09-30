@@ -4,14 +4,19 @@
   ANT home page: http://ant.apache.org/
 -->
 <project name="Vuzit" basedir=".">
-  <property name="src.dir"     value="src"/>
-  <property name="vuzit.src.dir"     value="${src.dir}/com/vuzit"/>
-  <property name="build.dir"   value="build"/>
-  <property name="classes.dir" value="${build.dir}/classes"/>
-  <property name="jar.dir"     value="${build.dir}/jar"/>
+  <property name="bin.dir"       value="bin"/>
+  <property name="src.dir"       value="src"/>
+  <property name="vuzit.src.dir" value="${src.dir}/com/vuzit"/>
+  <property name="build.dir"     value="build"/>
+  <property name="classes.dir"   value="${build.dir}/classes"/>
+  <property name="jar.dir"       value="${build.dir}/jar"/>
 
+  <!--
+    Cleans all compiled junk files.  
+  -->
   <target name="clean">
     <delete dir="${build.dir}"/>
+    <delete dir="${bin.dir}"/>
   </target>
 
   <target name="compile">
@@ -19,15 +24,28 @@
     <javac srcdir="${vuzit.src.dir}" destdir="${classes.dir}"/>
   </target>
 
+  <!--
+    Creates the Vuzit.jar file.  
+  -->
   <target name="jar">
     <mkdir dir="${jar.dir}"/>
     <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}">
     </jar>
   </target>
 
+  <!--
+    Creates the VuzitCL application in the bin directory for testing purposes.  
+  -->
   <target name="bin">
-    <javac srcdir="${src.dir}" destdir="${classes.dir}"/>
-    <jar destfile="${jar.dir}/VuzitCL.jar" basedir="${classes.dir}">
+    <antcall target="compile"/>
+    <antcall target="jar"/>
+
+    <mkdir dir="${bin.dir}"/>
+    <mkdir dir="${classes.dir}/${bin.dir}"/>
+    <copy file="${jar.dir}/${ant.project.name}.jar" todir="${bin.dir}"/>
+
+    <javac srcdir="${src.dir}" destdir="${classes.dir}/${bin.dir}"/>
+    <jar destfile="${bin.dir}/VuzitCL.jar" basedir="${classes.dir}/${bin.dir}">
       <manifest>
         <attribute name="Main-Class" value="VuzitCL"/>
       </manifest>

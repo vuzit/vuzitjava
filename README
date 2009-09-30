@@ -15,12 +15,12 @@ Service API through short commands:
 
 Below is a basic upload example:
 
-  vuzit.Service.setPublicKey("YOUR_PUBLIC_API_KEY");  
-  vuzit.Service.setPrivateKey("YOUR_PRIVATE_API_KEY"); 
+  com.vuzit.Service.setPublicKey("YOUR_PUBLIC_API_KEY");  
+  com.vuzit.Service.setPrivateKey("YOUR_PRIVATE_API_KEY"); 
 
-  vuzit.Document doc = vuzit.Document.Upload(@"c:\path\to\document.pdf");  
+  com.vuzit.Document doc = com.vuzit.Document.upload(@"c:\path\to\document.pdf");  
 
-  System.println("Document id: " + doc.getId());  
+  System.out.println("Document id: " + doc.getId());  
 
 To get started all you need to do is download the code, sign up for a free 
 account (https://ssl.vuzit.com/signup) and replace the public and 
@@ -39,7 +39,7 @@ private keys with the keys from your account.
 * To check if your install was successful add the following to a .NET project 
   file (this assumes C#, use the appropriate version for C++/VB.NET, etc):
 
-  import vuzit;
+  import com.vuzit;
 
   If it compiles without any errors then you've succeeded.
 
@@ -60,40 +60,40 @@ private keys with the keys from your account.
 
 Find Document Example - how to load a document
 
-  vuzit.Service.setPublicKey("YOUR_PUBLIC_API_KEY");  
-  vuzit.Service.setPrivateKey("YOUR_PRIVATE_API_KEY");  
+  com.vuzit.Service.setPublicKey("YOUR_PUBLIC_API_KEY");  
+  com.vuzit.Service.setPrivateKey("YOUR_PRIVATE_API_KEY");  
 
-  vuzit.Document doc = vuzit.Document.findById("DOCUMENT_ID");
+  com.vuzit.Document doc = com.vuzit.Document.findById("DOCUMENT_ID");
 
-  System.println("Document id: {0}", doc.Id);
-  System.println("Document title: {0}", doc.Title);
+  System.out.println("Document id: " + doc.getId());
+  System.out.println("Document title: " + doc.getTitle());
 
 Delete (destroy) Document Example
 
-  vuzit.Service.setPublicKey("YOUR_PUBLIC_API_KEY");  
-  vuzit.Service.setPrivateKey("YOUR_PRIVATE_API_KEY");  
+  com.vuzit.Service.setPublicKey("YOUR_PUBLIC_API_KEY");  
+  com.vuzit.Service.setPrivateKey("YOUR_PRIVATE_API_KEY");  
 
-  vuzit.Document.destroy("DOCUMENT_ID");
+  com.vuzit.Document.destroy("DOCUMENT_ID");
 
 Upload and View with the JavaScript API Example
 
   <%
   // Set the public and private keys
-  vuzit.Service.setPublicKey("YOUR_PUBLIC_API_KEY");  
-  vuzit.Service.setPrivateKey("YOUR_PRIVATE_API_KEY");  
+  com.vuzit.Service.setPublicKey("YOUR_PUBLIC_API_KEY");  
+  com.vuzit.Service.setPrivateKey("YOUR_PRIVATE_API_KEY");  
 
   // Substitute the code below with the Vuzit document ID.  
-  string documentId = "XXXXXXX";
-  DateTime date = DateTime.Now;
+  String documentId = "XXXXXXX";
+  java.util.Date date = DateTime.Now;
 
   // Upload "timestamp" parameter
-  string timestamp = vuzit.Service.epochTime(date).ToString();
+  int timestamp = date.getDate() / 1000;
 
   // Upload "signature" parameter
-  string signature = Vuzit.Service.GetSignature("show", documentId, date);
+  string signature = com.vuzit.Service.signature("show", documentId, date);
 
   // Creates a URL-encoded signature
-  string encodedSig = Vuzit.Service.UrlEncode(signature);
+  string encodedSig = com.vuzit.Service.urlEncode(signature);
   %>
   <html>
     <head>
@@ -102,7 +102,7 @@ Upload and View with the JavaScript API Example
       <script type="text/javascript">
         // Called when the page is loaded.  
         function initialize()  {
-          vuzit.Base.apiKeySet("<%= Vuzit.Service.PublicKey %>"); 
+          vuzit.Base.apiKeySet("<%= com.vuzit.Service.getPublicKey() %>"); 
           var options = {signature: '<%= encodedSig %>', 
                          timestamp: '<%= timestamp %>', ssl: true}
           var viewer = vuzit.Viewer.fromId("<%= documentId %>", options);
