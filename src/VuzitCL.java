@@ -51,7 +51,7 @@ public class VuzitCL
 
     // load command
     String loadValue = (String)parser.getOptionValue(load);
-    if(loadValue == null) {
+    if(loadValue != null) {
       com.vuzit.Document document = com.vuzit.Document.findById(loadValue);
       System.out.println("LOADED: " + document.getId());
       System.out.println("title: " + document.getTitle());

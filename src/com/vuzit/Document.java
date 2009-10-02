@@ -1,13 +1,25 @@
 
 package com.vuzit;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
+import java.net.HttpURLConnection;
+
+import java.io.InputStreamReader;
+
 /**
  * Class for manipulating documents from Vuzit.  
  */
 public class Document extends Base
 {
   // Private class variables
-  private String id = null;
+  private String webId = null;
   private String title = null;
   private String subject = null;
   private int pageCount = -1;
@@ -21,7 +33,7 @@ public class Document extends Base
    * Returns the web id of the document.  
    */
   public String getId() {
-    return id;
+    return webId;
   }
 
   /**
@@ -74,9 +86,45 @@ public class Document extends Base
   public static Document findById(String webId)
   {
     Document result = new Document();
-    result.id = "test";
 
-    // TODO: Add the loading code in here
+    if(webId == null) {
+      // TODO: Throw exception here
+    }
+
+    java.util.Hashtable parameters = postParameters("show", webId);
+
+    String url = parametersToUrl("documents", parameters, webId);
+
+    java.net.HttpURLConnection connection = httpConnection(url, "GET");
+
+    BufferedReader reader = null;
+    String line = null;
+    try {
+      connection.connect();
+
+      reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+      while ((line = reader.readLine()) != null)
+      {
+        System.out.print(line);
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    finally
+    {
+      connection.disconnect();
+      connection = null;
+    }
+
+    System.out.println(url);
+
+    result.webId = webId;
+    result.title = "Title";
+    result.subject = "Subject";
+    result.pageCount = 5;
+    result.pageHeight = 10;
+    result.pageWidth = 7;
+    result.fileSize = 1024;
 
     return result;
   }

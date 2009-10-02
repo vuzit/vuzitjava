@@ -46,6 +46,33 @@ public class Service
      privateKey = key;
    }
 
+   /**
+    * Returns the service URL.  
+    */
+   public static String getServiceUrl()
+   {
+     return serviceUrl;
+   }
+
+   /**
+    * Sets the service URL.  
+    */
+   public static void setServiceUrl(String url)
+   {
+     serviceUrl = url;
+   }
+
+   /**
+    * Converts a date to the date at epoch time.  
+    */
+   public static long epochTime(Date date)
+   {
+     return (date.getTime() / 1000);
+   }
+
+   /**
+    * Returns a valid Vuzit request signature.  
+    */
    public static String signature(String service, String id, Date date)
    {
      String result;
@@ -58,7 +85,7 @@ public class Service
        date = new Date();
      }
 
-     String msg = service + id + publicKey + (date.getTime() / 1000);
+     String msg = service + id + publicKey + epochTime(date);
 
      try {
        result = calculateRFC2104HMAC(msg, privateKey);
