@@ -1,17 +1,16 @@
 
 package com.vuzit;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.net.HttpURLConnection;
-
-import java.io.InputStreamReader;
+import org.w3c.dom.*;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.DocumentBuilder;
 
 /**
  * Class for manipulating documents from Vuzit.  
@@ -92,22 +91,42 @@ public class Document extends Base
     }
 
     java.util.Hashtable parameters = postParameters("show", webId);
-
     String url = parametersToUrl("documents", parameters, webId);
-
     java.net.HttpURLConnection connection = httpConnection(url, "GET");
 
-    BufferedReader reader = null;
-    String line = null;
-    try {
+    try
+    {
       connection.connect();
 
-      reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-      while ((line = reader.readLine()) != null)
+      DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+      DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
+
+      org.w3c.dom.Document doc = docBuilder.parse(connection.getInputStream());
+
+      doc.getDocumentElement().normalize();
+
+      // TODO: Search for the "err" node here.  If present then proceed to extracting the 
+      //       error message.  Write some special code to handle it in a function. 
+
+      NodeList docList = doc.getElementsByTagName("document");
+
+      for(int i = 0; i < docList.getLength(); i++)
       {
-        System.out.print(line);
+         Node firstNode = docList.item(i);
+
+         if(firstNode.getNodeType() == Node.ELEMENT_NODE)
+         {
+           Element element = (Element)firstNode;
+           result.webId = childNodeValue(element, "web_id");
+           result.title = childNodeValue(element, "title");
+           result.subject = childNodeValue(element, "subject");
+           result.pageCount = Integer.parseInt(childNodeValue(element, "page_count"));
+           result.pageWidth = Integer.parseInt(childNodeValue(element, "width"));
+           result.pageHeight = Integer.parseInt(childNodeValue(element, "height"));
+           result.fileSize = Integer.parseInt(childNodeValue(element, "file_size"));
+         }
       }
-    } catch (IOException e) {
+    } catch (Exception e) {
       e.printStackTrace();
     }
     finally
@@ -115,16 +134,6 @@ public class Document extends Base
       connection.disconnect();
       connection = null;
     }
-
-    System.out.println(url);
-
-    result.webId = webId;
-    result.title = "Title";
-    result.subject = "Subject";
-    result.pageCount = 5;
-    result.pageHeight = 10;
-    result.pageWidth = 7;
-    result.fileSize = 1024;
 
     return result;
   }

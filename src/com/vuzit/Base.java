@@ -10,9 +10,32 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.io.IOException;
+import org.w3c.dom.*;
 
 public class Base
 {
+  /**
+   * Returns the child node text value of an element.  
+   */
+  protected static String childNodeValue(Element element, String childName)
+  {
+    String result = null;
+
+    NodeList nameList = element.getElementsByTagName(childName);
+    Element nameElement = (Element)nameList.item(0);
+
+    NodeList textList = nameElement.getChildNodes();
+
+    if(textList.getLength() > 0) {
+      result = ((Node)textList.item(0)).getNodeValue().trim();
+    }
+    else {
+      result = "";
+    }
+
+    return result;
+  }
+
   /**
    * Returns a HTTP connection based upon the URL and request method.  
    */
@@ -91,6 +114,4 @@ public class Base
 
     return result;
   }
-
-
 }
