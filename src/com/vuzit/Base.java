@@ -11,7 +11,12 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.io.IOException;
 import org.w3c.dom.*;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.DocumentBuilder;
 
+/**
+ * Vuzit web client base class.  
+ */
 public abstract class Base
 {
   /**
@@ -111,5 +116,33 @@ public abstract class Base
     result.put("timestamp", Long.toString(Service.epochTime(now)));
 
     return result;
+  }
+
+  /**
+   * Traps and extracts web client errors for debugging purposes.  
+   */
+  protected static void webClientError(HttpURLConnection connection)
+  {
+    try
+    {
+       DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+       DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
+       org.w3c.dom.Document doc;
+ 
+       doc = docBuilder.parse(connection.getErrorStream());
+       doc.getDocumentElement().normalize();
+ 
+       NodeList errorList = doc.getElementsByTagName("err");
+       if(errorList.getLength() > 0)
+       {
+          Element errorNode = (Element)errorList.item(0);
+          throw new WebClientException(childNodeValue(errorNode, "msg"), 
+                                       childNodeValue(errorNode, "code"));
+       }
+     }
+     catch(Exception e)
+     {
+       e.printStackTrace();
+     }
   }
 }

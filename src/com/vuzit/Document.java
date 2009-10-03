@@ -86,10 +86,6 @@ public class Document extends Base
   {
     Document result = new Document();
 
-    if(webId == null) {
-      // TODO: Throw exception here
-    }
-
     java.util.Hashtable parameters = postParameters("show", webId);
     String url = parametersToUrl("documents", parameters, webId);
     java.net.HttpURLConnection connection = httpConnection(url, "GET");
@@ -100,14 +96,9 @@ public class Document extends Base
 
       DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
       DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
-
       org.w3c.dom.Document doc = docBuilder.parse(connection.getInputStream());
 
       doc.getDocumentElement().normalize();
-
-      // TODO: Search for the "err" node here.  If present then proceed to extracting the 
-      //       error message.  Write some special code to handle it in a function. 
-
       NodeList docList = doc.getElementsByTagName("document");
 
       for(int i = 0; i < docList.getLength(); i++)
@@ -126,6 +117,8 @@ public class Document extends Base
            result.fileSize = Integer.parseInt(childNodeValue(element, "file_size"));
          }
       }
+    } catch (java.io.FileNotFoundException e) {
+      webClientError(connection);
     } catch (Exception e) {
       e.printStackTrace();
     }
