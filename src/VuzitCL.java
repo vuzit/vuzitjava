@@ -61,13 +61,6 @@ public class VuzitCL
       System.out.println("height: " + document.getPageHeight());
       System.out.println("size: " + document.getFileSize());
     }
-
-    // TODO: Delete this old junk code
-    Date date = new Date(1247967923000L);
-    System.out.println(date.toString());
-
-    String sig = com.vuzit.Service.signature("show", "1bgi", date);
-    System.out.println(sig);
   }
 
   /**

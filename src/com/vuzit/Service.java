@@ -12,6 +12,8 @@ public class Service
    private static String publicKey = null;
    private static String privateKey = null;
    private static String serviceUrl = "http://vuzit.com";
+   private static final String productName = "VuzitJava Library 1.0.0";
+   private static String userAgent = productName;
    private static final String HMAC_SHA1_ALGORITHM = "HmacSHA1";
 
    /**
@@ -60,6 +62,22 @@ public class Service
    public static void setServiceUrl(String url)
    {
      serviceUrl = url;
+   }
+
+   /**
+    * Returns the user agent. 
+    */
+   public static String getUserAgent()
+   {
+     return userAgent;
+   }
+
+   /**
+    * Sets the user agent.  
+    */
+   public static void setUserAgent(String agent)
+   {
+     userAgent = (agent + " (" + productName + ")");
    }
 
    /**

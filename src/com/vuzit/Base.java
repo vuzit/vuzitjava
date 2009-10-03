@@ -12,14 +12,14 @@ import java.net.URL;
 import java.io.IOException;
 import org.w3c.dom.*;
 
-public class Base
+public abstract class Base
 {
   /**
    * Returns the child node text value of an element.  
    */
   protected static String childNodeValue(Element element, String childName)
   {
-    String result = null;
+    String result = "";
 
     NodeList nameList = element.getElementsByTagName(childName);
     Element nameElement = (Element)nameList.item(0);
@@ -28,9 +28,6 @@ public class Base
 
     if(textList.getLength() > 0) {
       result = ((Node)textList.item(0)).getNodeValue().trim();
-    }
-    else {
-      result = "";
     }
 
     return result;
@@ -46,6 +43,7 @@ public class Base
     try {
       URL address = new URL(url);
       result = (HttpURLConnection)address.openConnection();
+      result.setRequestProperty("User-agent", Service.getUserAgent());
       result.setRequestMethod(method);
       result.setDoOutput(true);
       result.setReadTimeout(10000);
