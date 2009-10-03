@@ -79,6 +79,35 @@ public class Document extends Base
 
   // Public static methods
 
+  public static void destroy(String webId)
+  {
+    java.util.Hashtable parameters = postParameters("destroy", webId);
+    String url = parametersToUrl("documents", parameters, webId);
+    java.net.HttpURLConnection connection = httpConnection(url, "DELETE");
+
+    try
+    {
+      connection.connect();
+
+      if(connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+        // Check for a Vuzit returned error code
+        webClientErrorCheck(connection);
+
+        // If there is no other error then throw a generic HTTP error
+        throw new WebClientException("HTTP error: [" + 
+                                     connection.getResponseCode() + "], " + 
+                                     connection.getResponseMessage());
+      }
+    } catch (java.io.IOException e) {
+      webClientErrorCheck(connection);
+    } 
+    finally
+    {
+      connection.disconnect();
+      connection = null;
+    }
+  }
+
   /**
    * Loads a document by the web id.  
    */
@@ -99,6 +128,7 @@ public class Document extends Base
       org.w3c.dom.Document doc = docBuilder.parse(connection.getInputStream());
 
       doc.getDocumentElement().normalize();
+
       NodeList docList = doc.getElementsByTagName("document");
 
       for(int i = 0; i < docList.getLength(); i++)
@@ -117,8 +147,8 @@ public class Document extends Base
            result.fileSize = Integer.parseInt(childNodeValue(element, "file_size"));
          }
       }
-    } catch (java.io.FileNotFoundException e) {
-      webClientError(connection);
+    } catch (java.io.IOException e) {
+      webClientErrorCheck(connection);
     } catch (Exception e) {
       e.printStackTrace();
     }

@@ -4,7 +4,7 @@ package com.vuzit;
 /**
  * Traps web client exception errors.  
  */
-public class WebClientException extends java.lang.Exception
+public class WebClientException extends java.lang.RuntimeException
 {
   // Private instance variables
   private int code = -1;

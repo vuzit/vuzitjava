@@ -121,28 +121,30 @@ public abstract class Base
   /**
    * Traps and extracts web client errors for debugging purposes.  
    */
-  protected static void webClientError(HttpURLConnection connection)
+  protected static void webClientErrorCheck(HttpURLConnection connection)
   {
+    org.w3c.dom.Document doc;
+
     try
     {
-       DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
-       DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
-       org.w3c.dom.Document doc;
- 
-       doc = docBuilder.parse(connection.getErrorStream());
-       doc.getDocumentElement().normalize();
- 
-       NodeList errorList = doc.getElementsByTagName("err");
-       if(errorList.getLength() > 0)
-       {
-          Element errorNode = (Element)errorList.item(0);
-          throw new WebClientException(childNodeValue(errorNode, "msg"), 
-                                       childNodeValue(errorNode, "code"));
-       }
-     }
-     catch(Exception e)
-     {
-       e.printStackTrace();
-     }
+      DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+      DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
+
+      doc = docBuilder.parse(connection.getErrorStream());
+      doc.getDocumentElement().normalize();
+    }
+    catch(Exception e)
+    {
+      e.printStackTrace();
+      return;
+    }
+
+    NodeList errorList = doc.getElementsByTagName("err");
+    if(errorList.getLength() > 0)
+    {
+      Element errorNode = (Element)errorList.item(0);
+      throw new WebClientException(childNodeValue(errorNode, "msg"), 
+                                   childNodeValue(errorNode, "code"));
+    }
   }
 }

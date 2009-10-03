@@ -21,6 +21,7 @@ public class VuzitCL
     CmdLineParser.Option keys = parser.addStringOption('k', "keys");
     CmdLineParser.Option help = parser.addBooleanOption('h', "help");
     CmdLineParser.Option load = parser.addStringOption('l', "load");
+    CmdLineParser.Option destroy = parser.addStringOption('d', "delete");
 
     try {
       parser.parse(args);
@@ -49,10 +50,30 @@ public class VuzitCL
     com.vuzit.Service.setPublicKey(keyList[0]);
     com.vuzit.Service.setPrivateKey(keyList[1]);
 
+    // delete command
+    String destroyValue = (String)parser.getOptionValue(destroy);
+    if(destroyValue != null) {
+      try {
+        com.vuzit.Document.destroy(destroyValue);
+        System.out.println("DELETED: " + destroyValue);
+      } catch (WebClientException wce) {
+        System.out.println("Delete failed: " + wce.getMessage());
+        System.exit(2);
+        return;
+      }
+    }
+ 
     // load command
     String loadValue = (String)parser.getOptionValue(load);
     if(loadValue != null) {
-      com.vuzit.Document document = com.vuzit.Document.findById(loadValue);
+      com.vuzit.Document document;
+      try {
+        document = com.vuzit.Document.findById(loadValue);
+      } catch (WebClientException wce) {
+        System.out.println("Load failed: " + wce.getMessage());
+        System.exit(2);
+        return;
+      }
       System.out.println("LOADED: " + document.getId());
       System.out.println("title: " + document.getTitle());
       System.out.println("subject: " + document.getSubject());
