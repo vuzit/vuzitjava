@@ -79,6 +79,9 @@ public class Document extends Base
 
   // Public static methods
 
+  /**
+   * Deletes a document by the web ID.  
+   */
   public static void destroy(String webId)
   {
     java.util.Hashtable parameters = postParameters("destroy", webId);
@@ -157,6 +160,19 @@ public class Document extends Base
       connection.disconnect();
       connection = null;
     }
+
+    return result;
+  }
+
+  /**
+   * Uploads a document vai the Vuzit service.  
+   */
+  public static Document upload(String path)
+  {
+    Document result = new Document();
+    result.webId = "TODO";
+
+    // TODO: Check if the file exists here
 
     return result;
   }

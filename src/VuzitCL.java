@@ -22,6 +22,9 @@ public class VuzitCL
     CmdLineParser.Option help = parser.addBooleanOption('h', "help");
     CmdLineParser.Option load = parser.addStringOption('l', "load");
     CmdLineParser.Option destroy = parser.addStringOption('d', "delete");
+    CmdLineParser.Option serviceUrl = parser.addStringOption('s', "service-url");
+    CmdLineParser.Option verbose = parser.addStringOption('v', "verbose");
+    CmdLineParser.Option upload = parser.addStringOption('u', "upload");
 
     try {
       parser.parse(args);
@@ -49,6 +52,25 @@ public class VuzitCL
     String[] keyList = keyValues.split(",");
     com.vuzit.Service.setPublicKey(keyList[0]);
     com.vuzit.Service.setPrivateKey(keyList[1]);
+
+    // service-url command
+    String serviceUrlValue = (String)parser.getOptionValue(serviceUrl);
+    if(serviceUrlValue == null) {
+      com.vuzit.Service.setServiceUrl(serviceUrlValue);
+    }
+
+    // upload command
+    String uploadValue = (String)parser.getOptionValue(upload);
+    if(uploadValue != null) {
+      try {
+        com.vuzit.Document doc = com.vuzit.Document.upload(uploadValue);
+        System.out.println("UPLOADED: " + doc.getId());
+      } catch (WebClientException wce) {
+        System.out.println("Upload failed: " + wce.getMessage());
+        System.exit(2);
+        return;
+      }
+    }
 
     // delete command
     String destroyValue = (String)parser.getOptionValue(destroy);

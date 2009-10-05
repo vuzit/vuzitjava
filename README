@@ -18,7 +18,7 @@ Below is a basic upload example:
   com.vuzit.Service.setPublicKey("YOUR_PUBLIC_API_KEY");  
   com.vuzit.Service.setPrivateKey("YOUR_PRIVATE_API_KEY"); 
 
-  com.vuzit.Document doc = com.vuzit.Document.upload(@"c:\path\to\document.pdf");  
+  com.vuzit.Document doc = com.vuzit.Document.upload("c:/path/to/document.pdf");  
 
   System.out.println("Document id: " + doc.getId());  
 
@@ -30,15 +30,13 @@ private keys with the keys from your account.
 -- INITIAL SETUP
 --------------------------------------------------
 
-* Take the DLL for your .NET Framework version out of the Bin directory 
+* Take the Vuzit.jar file from the build/jar directory 
 
   * build/jar 
 
 * Add the JAR file as a reference in your project.    
 
-* To check if your install was successful add the following to a .NET project 
-  file (this assumes C#, use the appropriate version for C++/VB.NET, etc):
-
+* To check if your install was successful add the following to a Java project:
   import com.vuzit;
 
   If it compiles without any errors then you've succeeded.

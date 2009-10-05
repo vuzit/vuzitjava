@@ -4,19 +4,18 @@
   ANT home page: http://ant.apache.org/
 -->
 <project name="Vuzit" basedir=".">
-  <property name="bin.dir"       value="bin"/>
   <property name="src.dir"       value="src"/>
   <property name="vuzit.src.dir" value="${src.dir}/com/vuzit"/>
   <property name="build.dir"     value="build"/>
   <property name="classes.dir"   value="${build.dir}/classes"/>
   <property name="jar.dir"       value="${build.dir}/jar"/>
+  <property name="bin.dir"       value="${build.dir}/bin"/>
 
   <!--
     Cleans all compiled junk files.  
   -->
   <target name="clean">
     <delete dir="${build.dir}"/>
-    <delete dir="${bin.dir}"/>
   </target>
 
   <target name="compile">
