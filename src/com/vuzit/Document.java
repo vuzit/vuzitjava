@@ -97,9 +97,9 @@ public class Document extends Base
         webClientErrorCheck(connection);
 
         // If there is no other error then throw a generic HTTP error
-        throw new WebClientException("HTTP error: [" + 
-                                     connection.getResponseCode() + "], " + 
-                                     connection.getResponseMessage());
+        throw new ClientException("HTTP error: [" + 
+                                  connection.getResponseCode() + "], " + 
+                                  connection.getResponseMessage());
       }
     } catch (java.io.IOException e) {
       webClientErrorCheck(connection);

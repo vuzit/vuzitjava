@@ -83,17 +83,20 @@ public abstract class Base
       String key = (String)it.next();
       String value = (String)params.get(key);
 
-      result.append(key).append("=");
-
-      try {
-        value = URLEncoder.encode(value, "UTF-8"); 
+      // Do not add keys with null or empty values
+      // TODO: Check the length of the string as well
+      if(value != null)
+      {
+        try {
+          result.append(key).append("=");
+          value = URLEncoder.encode(value, "UTF-8"); 
+          result.append(value);
+          result.append("&");
+        }
+        catch(UnsupportedEncodingException uee) {
+          System.err.println(uee);
+        }
       }
-      catch(UnsupportedEncodingException uee) {
-        System.err.println(uee);
-      }
-      result.append(value);
-      
-      result.append("&");
     }
 
     return result.toString();
@@ -143,8 +146,8 @@ public abstract class Base
     if(errorList.getLength() > 0)
     {
       Element errorNode = (Element)errorList.item(0);
-      throw new WebClientException(childNodeValue(errorNode, "msg"), 
-                                   childNodeValue(errorNode, "code"));
+      throw new ClientException(childNodeValue(errorNode, "msg"), 
+                                childNodeValue(errorNode, "code"));
     }
   }
 }

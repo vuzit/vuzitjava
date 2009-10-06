@@ -4,19 +4,19 @@ package com.vuzit;
 /**
  * Traps web client exception errors.  
  */
-public class WebClientException extends java.lang.RuntimeException
+public class ClientException extends java.lang.RuntimeException
 {
   // Private instance variables
   private int code = -1;
 
   // Constructors
 
-  public WebClientException(String message)
+  public ClientException(String message)
   {
     super(message);
   }
 
-  public WebClientException(String message, String code)
+  public ClientException(String message, String code)
   {
     super("Code [" + code + "], Message: " + message);
     this.code = Integer.parseInt(code);
