@@ -2,15 +2,14 @@
 package com.vuzit;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
+import java.io.File;
+import java.io.InputStream;
+import java.io.FileInputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import org.w3c.dom.*;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
 
 /**
  * Class for manipulating documents from Vuzit.  
@@ -126,30 +125,19 @@ public class Document extends Base
     {
       connection.connect();
 
-      DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
-      DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
-      org.w3c.dom.Document doc = docBuilder.parse(connection.getInputStream());
+      Element element = xmlRootNode(connection.getInputStream(), "document");
 
-      doc.getDocumentElement().normalize();
-
-      NodeList docList = doc.getElementsByTagName("document");
-
-      for(int i = 0; i < docList.getLength(); i++)
-      {
-         Node firstNode = docList.item(i);
-
-         if(firstNode.getNodeType() == Node.ELEMENT_NODE)
-         {
-           Element element = (Element)firstNode;
-           result.webId = childNodeValue(element, "web_id");
-           result.title = childNodeValue(element, "title");
-           result.subject = childNodeValue(element, "subject");
-           result.pageCount = Integer.parseInt(childNodeValue(element, "page_count"));
-           result.pageWidth = Integer.parseInt(childNodeValue(element, "width"));
-           result.pageHeight = Integer.parseInt(childNodeValue(element, "height"));
-           result.fileSize = Integer.parseInt(childNodeValue(element, "file_size"));
-         }
+      if(element == null) {
+        throw new ClientException("Response returned incorrect XML");
       }
+
+      result.webId = childNodeValue(element, "web_id");
+      result.title = childNodeValue(element, "title");
+      result.subject = childNodeValue(element, "subject");
+      result.pageCount = Integer.parseInt(childNodeValue(element, "page_count"));
+      result.pageWidth = Integer.parseInt(childNodeValue(element, "width"));
+      result.pageHeight = Integer.parseInt(childNodeValue(element, "height"));
+      result.fileSize = Integer.parseInt(childNodeValue(element, "file_size"));
     } catch (java.io.IOException e) {
       webClientErrorCheck(connection);
     } catch (Exception e) {
@@ -165,14 +153,131 @@ public class Document extends Base
   }
 
   /**
-   * Uploads a document vai the Vuzit service.  
+   * Uploads a document from disk via the Vuzit service.  
    */
   public static Document upload(String path)
   {
-    Document result = new Document();
-    result.webId = "TODO";
+    Document result = null;
 
-    // TODO: Check if the file exists here
+    File file = new File(path);
+    FileInputStream stream = null;
+
+    try {
+      stream = new FileInputStream(file);
+    } catch(java.io.FileNotFoundException e) {
+      throw new ClientException("Cannot find file at path: " + path);
+    }
+    result = upload(stream, null, file.getName(), true);
+
+    return result;
+  }
+
+  /**
+   * Uploads a document from an InputStream via the Vuzit service.  
+   */
+  public static Document upload(InputStream stream, String fileType, 
+                                String fileName, boolean secure)
+  {
+    Document result = new Document();
+
+    if(fileName == null) {
+      fileName = "document";
+    }
+
+    java.util.Hashtable parameters = postParameters("create", null);
+    if(fileType != null) {
+      parameters.put("file_type", fileType);
+    }
+    parameters.put("secure", (secure) ? "1" : "0");
+
+    String url = parametersToUrl("documents", parameters, null);
+    InputStream response = uploadFile(stream, url, "upload", null, fileName);
+
+    Element element = xmlRootNode(response, "document");
+    if(element == null) {
+      throw new ClientException("Response returned incorrect XML");
+    }
+
+    result.webId = childNodeValue(element, "web_id");
+    try {
+      response.close();
+    } catch(IOException ex) {
+    }
+
+    return result;
+  }
+
+  /**
+   * Uploads a file via an HTTP post operation.  Returns the stream response 
+   * from the HTTP server.  
+   */
+  private static InputStream uploadFile(InputStream stream, String url, 
+                                        String fileFormName, String contentType, 
+                                        String fileName)
+  {
+    InputStream result = null;
+
+    DataOutputStream dos = null;
+    DataInputStream inStream = null;
+    String lineEnd = "\r\n";
+    String twoHyphens = "--";
+    String boundary =  "*****";
+
+    int bytesRead, bytesAvailable, bufferSize;
+    byte[] buffer;
+    int maxBufferSize = 1 * 1024 * 1024;
+
+    if(contentType == null) {
+      contentType = "application/octet-stream";
+    }
+
+    java.net.HttpURLConnection connection = httpConnection(url, "POST");
+
+    try
+    {
+      connection.setDoInput(true);
+      connection.setUseCaches(false);
+      connection.setRequestProperty("Connection", "Keep-Alive");
+      connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+      
+      dos = new DataOutputStream(connection.getOutputStream());
+
+      dos.writeBytes(twoHyphens + boundary + lineEnd);
+      dos.writeBytes("Content-Disposition: form-data; name=\"" + fileFormName + "\";"
+                     + " filename=\"" + fileName +"\"" + lineEnd);
+      dos.writeBytes(lineEnd);
+
+      // Create a buffer of maximum size
+      bytesAvailable = stream.available();
+      bufferSize = Math.min(bytesAvailable, maxBufferSize);
+      buffer = new byte[bufferSize];
+
+      // Read file and write it into form...
+      bytesRead = stream.read(buffer, 0, bufferSize);
+
+      while (bytesRead > 0)
+      {
+        dos.write(buffer, 0, bufferSize);
+        bytesAvailable = stream.available();
+        bufferSize = Math.min(bytesAvailable, maxBufferSize);
+        bytesRead = stream.read(buffer, 0, bufferSize);
+      }
+
+      // Send multipart form data necesssary after file data...
+      dos.writeBytes(lineEnd);
+      dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+
+      stream.close();
+      dos.flush();
+      dos.close();
+    } catch(IOException ex) {
+    }
+
+    try {
+      result = connection.getInputStream();
+    } catch(IOException ex) {
+      result = null;
+    }
 
     return result;
   }

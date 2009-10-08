@@ -55,7 +55,7 @@ public class VuzitCL
 
     // service-url command
     String serviceUrlValue = (String)parser.getOptionValue(serviceUrl);
-    if(serviceUrlValue == null) {
+    if(serviceUrlValue != null) {
       com.vuzit.Service.setServiceUrl(serviceUrlValue);
     }
 
@@ -65,8 +65,8 @@ public class VuzitCL
       try {
         com.vuzit.Document doc = com.vuzit.Document.upload(uploadValue);
         System.out.println("UPLOADED: " + doc.getId());
-      } catch (WebClientException wce) {
-        System.out.println("Upload failed: " + wce.getMessage());
+      } catch (ClientException ce) {
+        System.out.println("Upload failed: " + ce.getMessage());
         System.exit(2);
         return;
       }
@@ -78,8 +78,8 @@ public class VuzitCL
       try {
         com.vuzit.Document.destroy(destroyValue);
         System.out.println("DELETED: " + destroyValue);
-      } catch (WebClientException wce) {
-        System.out.println("Delete failed: " + wce.getMessage());
+      } catch (ClientException ce) {
+        System.out.println("Delete failed: " + ce.getMessage());
         System.exit(2);
         return;
       }
@@ -91,8 +91,8 @@ public class VuzitCL
       com.vuzit.Document document;
       try {
         document = com.vuzit.Document.findById(loadValue);
-      } catch (WebClientException wce) {
-        System.out.println("Load failed: " + wce.getMessage());
+      } catch (ClientException ce) {
+        System.out.println("Load failed: " + ce.getMessage());
         System.exit(2);
         return;
       }

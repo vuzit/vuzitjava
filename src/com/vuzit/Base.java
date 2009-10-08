@@ -10,6 +10,7 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.io.IOException;
+import java.io.InputStream;
 import org.w3c.dom.*;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
@@ -149,5 +150,41 @@ public abstract class Base
       throw new ClientException(childNodeValue(errorNode, "msg"), 
                                 childNodeValue(errorNode, "code"));
     }
+  }
+
+  /**
+   * Loads the defined root node from a block of XML.  Returns null if there is 
+   * an issue or the root node could not be found. 
+   */
+  protected static Element xmlRootNode(InputStream stream, String nodeName)
+  {
+    Element result = null;
+
+    try {
+      DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+      DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
+      org.w3c.dom.Document doc = docBuilder.parse(stream);
+
+      doc.getDocumentElement().normalize();
+
+      NodeList docList = doc.getElementsByTagName(nodeName);
+
+      for(int i = 0; i < docList.getLength(); i++)
+      {
+        Node firstNode = docList.item(i);
+
+        if(firstNode.getNodeType() == Node.ELEMENT_NODE)
+        {
+          result = (Element)firstNode;
+          break;
+        }
+      }
+    }
+    catch(Exception ex)
+    {
+      result = null;
+    }
+
+    return result;
   }
 }
