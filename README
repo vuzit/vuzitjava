@@ -32,15 +32,23 @@ private keys with the keys from your account.
 
 * Take the Vuzit.jar file from the build/jar directory 
 
-  * build/jar 
-
 * Add the JAR file as a reference in your project.    
 
-* To check if your install was successful add the following to a Java project:
+* To check if your install was successful add the code below to your source 
+  code and if it compiles without any errors then you've succeeded.
+
   import com.vuzit;
 
-  If it compiles without any errors then you've succeeded.
+* If you want to compile the source code then you will need to install Ant
+  (http://ant.apache.org/) and run the following command in the root 
+  directory (with the build.xml in it):
 
+  ant jar
+
+* To build the VuzitCL command-line interface to the Vuzit API run this 
+  command with Ant:
+
+  ant bin
 
 --------------------------------------------------
 -- GETTING STARTED 
@@ -48,8 +56,8 @@ private keys with the keys from your account.
 
 * Download the code - http://github.com/vuzit/vuzitjava/downloads
 * Sign up for a free Vuzit account - https://ssl.vuzit.com/signup
-* Code Examples - http://wiki.github.com/vuzit/vuzitjava/code-samples
-* Vuzit API Reference - http://wiki.github.com/vuzit/vuzitjava/api-reference
+* Code Examples - http://wiki.github.com/vuzit/vuzitjava/code_examples
+* Vuzit API Reference - http://wiki.github.com/vuzit/vuzitjava/api_reference
 
 
 --------------------------------------------------
@@ -82,16 +90,16 @@ Upload and View with the JavaScript API Example
 
   // Substitute the code below with the Vuzit document ID.  
   String documentId = "XXXXXXX";
-  java.util.Date date = DateTime.Now;
+  java.util.Date date = new java.util.Date();
 
-  // Upload "timestamp" parameter
-  int timestamp = date.getDate() / 1000;
+  // Show document "timestamp" parameter
+  long timestamp = com.vuzit.Service.epochTime(date);
 
-  // Upload "signature" parameter
+  // Show document "signature" parameter
   string signature = com.vuzit.Service.signature("show", documentId, date);
 
   // Creates a URL-encoded signature
-  string encodedSig = com.vuzit.Service.urlEncode(signature);
+  string encodedSig = java.net.URLEncoder.encode(signature, "UTF-8"); 
   %>
   <html>
     <head>

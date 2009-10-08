@@ -16,6 +16,8 @@ public class Service
    private static String userAgent = productName;
    private static final String HMAC_SHA1_ALGORITHM = "HmacSHA1";
 
+   // Public getter and setter variables
+
    /**
     * Returns the public key.  
     */
@@ -80,6 +82,8 @@ public class Service
      userAgent = (agent + " (" + productName + ")");
    }
 
+   // Public static methods
+
    /**
     * Converts a date to the date at epoch time.  
     */
@@ -113,6 +117,8 @@ public class Service
 
      return result;
    }
+
+   // Private static methods
 
    /**
     * Computes RFC 2104-compliant HMAC signature.

@@ -25,6 +25,7 @@ public class VuzitCL
     CmdLineParser.Option serviceUrl = parser.addStringOption('s', "service-url");
     CmdLineParser.Option verbose = parser.addStringOption('v', "verbose");
     CmdLineParser.Option upload = parser.addStringOption('u', "upload");
+    CmdLineParser.Option isPublic = parser.addBooleanOption('p', "public");
 
     try {
       parser.parse(args);
@@ -52,6 +53,7 @@ public class VuzitCL
     String[] keyList = keyValues.split(",");
     com.vuzit.Service.setPublicKey(keyList[0]);
     com.vuzit.Service.setPrivateKey(keyList[1]);
+    com.vuzit.Service.setUserAgent("VuzitCL Java 1.0.0");
 
     // service-url command
     String serviceUrlValue = (String)parser.getOptionValue(serviceUrl);
@@ -59,11 +61,18 @@ public class VuzitCL
       com.vuzit.Service.setServiceUrl(serviceUrlValue);
     }
 
+    // public command
+    Boolean publicValue = (Boolean)parser.getOptionValue(isPublic);
+    if(publicValue == null) {
+      publicValue = false;
+    }
+ 
     // upload command
     String uploadValue = (String)parser.getOptionValue(upload);
     if(uploadValue != null) {
       try {
-        com.vuzit.Document doc = com.vuzit.Document.upload(uploadValue);
+        // "secure" is the opposite of public
+        com.vuzit.Document doc = com.vuzit.Document.upload(uploadValue, !publicValue);
         System.out.println("UPLOADED: " + doc.getId());
       } catch (ClientException ce) {
         System.out.println("Upload failed: " + ce.getMessage());
@@ -84,7 +93,7 @@ public class VuzitCL
         return;
       }
     }
- 
+
     // load command
     String loadValue = (String)parser.getOptionValue(load);
     if(loadValue != null) {
@@ -125,6 +134,5 @@ public class VuzitCL
       "   -v, --verbose                    Prints more messages\n" +
       "   -h, --help                       Show this message\n"
       );
-  
   }
 }

@@ -153,9 +153,17 @@ public class Document extends Base
   }
 
   /**
-   * Uploads a document from disk via the Vuzit service.  
+   * Uploads a document from disk via the Vuzit service with the security turned on.  
    */
   public static Document upload(String path)
+  {
+    return upload(path, true);
+  }
+
+  /**
+   * Uploads a document from disk via the Vuzit service.  
+   */
+  public static Document upload(String path, boolean secure)
   {
     Document result = null;
 
@@ -167,7 +175,7 @@ public class Document extends Base
     } catch(java.io.FileNotFoundException e) {
       throw new ClientException("Cannot find file at path: " + path);
     }
-    result = upload(stream, null, file.getName(), true);
+    result = upload(stream, null, file.getName(), secure);
 
     return result;
   }
@@ -206,6 +214,8 @@ public class Document extends Base
 
     return result;
   }
+  
+  // Private static methods
 
   /**
    * Uploads a file via an HTTP post operation.  Returns the stream response 

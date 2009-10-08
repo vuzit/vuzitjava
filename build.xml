@@ -18,6 +18,9 @@
     <delete dir="${build.dir}"/>
   </target>
 
+  <!--
+    Compiles all source code.  
+  -->
   <target name="compile">
     <mkdir dir="${classes.dir}"/>
     <javac srcdir="${vuzit.src.dir}" destdir="${classes.dir}"/>
@@ -27,6 +30,7 @@
     Creates the Vuzit.jar file.  
   -->
   <target name="jar">
+    <antcall target="compile"/>
     <mkdir dir="${jar.dir}"/>
     <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}">
     </jar>
