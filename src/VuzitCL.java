@@ -112,6 +112,7 @@ public class VuzitCL
       System.out.println("width: " + document.getPageWidth());
       System.out.println("height: " + document.getPageHeight());
       System.out.println("size: " + document.getFileSize());
+      System.out.println("status: " + document.getStatus());
     }
   }
 

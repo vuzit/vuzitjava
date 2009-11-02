@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.io.File;
 import java.io.InputStream;
 import java.io.FileInputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import org.w3c.dom.*;
@@ -24,6 +22,7 @@ public class Document extends Base
   private int pageWidth = -1;
   private int pageHeight = -1;
   private int fileSize = -1;
+  private int status = -1;
 
   // Public instance data members
 
@@ -46,6 +45,13 @@ public class Document extends Base
    */
   public String getSubject() {
     return subject;
+  }
+
+  /**
+   * Returns the status of the document.  
+   */
+  public int getStatus() {
+    return status;
   }
 
   /**
@@ -138,6 +144,7 @@ public class Document extends Base
       result.pageWidth = Integer.parseInt(childNodeValue(element, "width"));
       result.pageHeight = Integer.parseInt(childNodeValue(element, "height"));
       result.fileSize = Integer.parseInt(childNodeValue(element, "file_size"));
+      result.status = Integer.parseInt(childNodeValue(element, "status"));
     } catch (java.io.IOException e) {
       webClientErrorCheck(connection);
     } catch (Exception e) {
@@ -210,83 +217,6 @@ public class Document extends Base
     try {
       response.close();
     } catch(IOException ex) {
-    }
-
-    return result;
-  }
-  
-  // Private static methods
-
-  /**
-   * Uploads a file via an HTTP post operation.  Returns the stream response 
-   * from the HTTP server.  
-   */
-  private static InputStream uploadFile(InputStream stream, String url, 
-                                        String fileFormName, String contentType, 
-                                        String fileName)
-  {
-    InputStream result = null;
-
-    DataOutputStream dos = null;
-    DataInputStream inStream = null;
-    String lineEnd = "\r\n";
-    String twoHyphens = "--";
-    String boundary =  "*****";
-
-    int bytesRead, bytesAvailable, bufferSize;
-    byte[] buffer;
-    int maxBufferSize = 1 * 1024 * 1024;
-
-    if(contentType == null) {
-      contentType = "application/octet-stream";
-    }
-
-    java.net.HttpURLConnection connection = httpConnection(url, "POST");
-
-    try
-    {
-      connection.setDoInput(true);
-      connection.setUseCaches(false);
-      connection.setRequestProperty("Connection", "Keep-Alive");
-      connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
-      
-      dos = new DataOutputStream(connection.getOutputStream());
-
-      dos.writeBytes(twoHyphens + boundary + lineEnd);
-      dos.writeBytes("Content-Disposition: form-data; name=\"" + fileFormName + "\";"
-                     + " filename=\"" + fileName +"\"" + lineEnd);
-      dos.writeBytes(lineEnd);
-
-      // Create a buffer of maximum size
-      bytesAvailable = stream.available();
-      bufferSize = Math.min(bytesAvailable, maxBufferSize);
-      buffer = new byte[bufferSize];
-
-      // Read file and write it into form...
-      bytesRead = stream.read(buffer, 0, bufferSize);
-
-      while (bytesRead > 0)
-      {
-        dos.write(buffer, 0, bufferSize);
-        bytesAvailable = stream.available();
-        bufferSize = Math.min(bytesAvailable, maxBufferSize);
-        bytesRead = stream.read(buffer, 0, bufferSize);
-      }
-
-      // Send multipart form data necesssary after file data...
-      dos.writeBytes(lineEnd);
-      dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
-
-      stream.close();
-      dos.flush();
-      dos.close();
-    } catch(IOException ex) {
-    }
-
-    try {
-      result = connection.getInputStream();
-    } catch(IOException ex) {
-      result = null;
     }
 
     return result;

@@ -11,6 +11,8 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import org.w3c.dom.*;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
@@ -52,7 +54,9 @@ public abstract class Base
       result.setRequestProperty("User-agent", Service.getUserAgent());
       result.setRequestMethod(method);
       result.setDoOutput(true);
-      result.setReadTimeout(10000);
+      // 60 second timeout to prevent timeouts with large requests,
+      // a busy server or IIS delays
+      result.setReadTimeout(60 * 1000); 
     } catch (MalformedURLException e) {
       e.printStackTrace();
     } catch (ProtocolException e) {
@@ -118,6 +122,81 @@ public abstract class Base
 
     result.put("signature", signature);
     result.put("timestamp", Long.toString(Service.epochTime(now)));
+
+    return result;
+  }
+
+  /**
+   * Uploads a file via an HTTP post operation.  Returns the stream response 
+   * from the HTTP server.  
+   */
+  protected static InputStream uploadFile(InputStream stream, String url, 
+                                          String fileFormName, String contentType, 
+                                          String fileName)
+  {
+    InputStream result = null;
+
+    DataOutputStream dos = null;
+    DataInputStream inStream = null;
+    String lineEnd = "\r\n";
+    String twoHyphens = "--";
+    String boundary =  "*****";
+
+    int bytesRead, bytesAvailable, bufferSize;
+    byte[] buffer;
+    int maxBufferSize = 1 * 1024 * 1024;
+
+    if(contentType == null) {
+      contentType = "application/octet-stream";
+    }
+
+    java.net.HttpURLConnection connection = httpConnection(url, "POST");
+
+    try
+    {
+      connection.setDoInput(true);
+      connection.setUseCaches(false);
+      connection.setRequestProperty("Connection", "Keep-Alive");
+      connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+      
+      dos = new DataOutputStream(connection.getOutputStream());
+
+      dos.writeBytes(twoHyphens + boundary + lineEnd);
+      dos.writeBytes("Content-Disposition: form-data; name=\"" + fileFormName + "\";"
+                     + " filename=\"" + fileName +"\"" + lineEnd);
+      dos.writeBytes(lineEnd);
+
+      // Create a buffer of maximum size
+      bytesAvailable = stream.available();
+      bufferSize = Math.min(bytesAvailable, maxBufferSize);
+      buffer = new byte[bufferSize];
+
+      // Read file and write it into form...
+      bytesRead = stream.read(buffer, 0, bufferSize);
+
+      while (bytesRead > 0)
+      {
+        dos.write(buffer, 0, bufferSize);
+        bytesAvailable = stream.available();
+        bufferSize = Math.min(bytesAvailable, maxBufferSize);
+        bytesRead = stream.read(buffer, 0, bufferSize);
+      }
+
+      // Send multipart form data necesssary after file data...
+      dos.writeBytes(lineEnd);
+      dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+
+      stream.close();
+      dos.flush();
+      dos.close();
+    } catch(IOException ex) {
+    }
+
+    try {
+      result = connection.getInputStream();
+    } catch(IOException ex) {
+      result = null;
+    }
 
     return result;
   }
