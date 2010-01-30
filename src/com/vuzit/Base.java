@@ -158,6 +158,8 @@ public abstract class Base
       connection.setUseCaches(false);
       connection.setRequestProperty("Connection", "Keep-Alive");
       connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+      // Set the timeout to 5 minutes since it's possibly a large file
+      connection.setReadTimeout(5 * 60 * 1000); 
       
       dos = new DataOutputStream(connection.getOutputStream());
 
