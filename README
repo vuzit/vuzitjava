@@ -11,7 +11,7 @@
 This is a library that allows developers to directly access the Vuzit Web 
 Service API through short commands:
 
-  http://vuzit.com/developer/documents_api
+  http://vuzit.com/developer/web_service_api
 
 Below is a basic upload example:
 

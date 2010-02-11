@@ -114,6 +114,14 @@ public abstract class Base
   {
     Hashtable result = new Hashtable();
 
+    // The keys must be set before this can function
+    if(Service.getPublicKey() == null) {
+      throw new ClientException("The public key cannot be null");
+    }
+    if(Service.getPrivateKey() == null) {
+      throw new ClientException("The private key cannot be null");
+    }
+
     result.put("method", method);
     result.put("key", Service.getPublicKey());
 

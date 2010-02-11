@@ -12,7 +12,7 @@ public class Service
    private static String publicKey = null;
    private static String privateKey = null;
    private static String serviceUrl = "http://vuzit.com";
-   private static final String productName = "VuzitJava Library 1.1.0";
+   private static final String productName = "VuzitJava Library 2.0.0";
    private static String userAgent = productName;
    private static final String HMAC_SHA1_ALGORITHM = "HmacSHA1";
 

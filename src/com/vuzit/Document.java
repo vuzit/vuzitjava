@@ -117,9 +117,9 @@ public class Document extends Base
   }
 
   /**
-   * Loads a document by the web id.  
+   * Loads a document by the web ID.  
    */
-  public static Document findById(String webId)
+  public static Document find(String webId)
   {
     Document result = new Document();
 
@@ -157,6 +157,14 @@ public class Document extends Base
     }
 
     return result;
+  }
+
+  /**
+   * Deprecated method to load a document by the web ID.  
+   */
+  public static Document findById(String webId)
+  {
+    return find(webId);
   }
 
   /**
