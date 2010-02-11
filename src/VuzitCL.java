@@ -123,6 +123,7 @@ public class VuzitCL
       print("height: " + document.getPageHeight());
       print("size: " + document.getFileSize());
       print("status: " + document.getStatus());
+      print("download url: " + com.vuzit.Document.downloadUrl(id, "pdf"));
     } catch (ClientException ce) {
       printError("Load failed: " + ce.getMessage());
     }
@@ -183,17 +184,13 @@ public class VuzitCL
     parseArguments(parser, args);
 
     Boolean secureValue = (Boolean)parser.getOptionValue(secure);
-    if(secureValue == null) {
-      secureValue = false;
-    }
+    secureValue = (secureValue == null) ? false : secureValue;
+
     Boolean pdfValue = (Boolean)parser.getOptionValue(pdf);
-    if(pdfValue == null) {
-      pdfValue = false;
-    }
+    pdfValue = (pdfValue == null) ? false : pdfValue;
+
     Boolean docValue = (Boolean)parser.getOptionValue(doc);
-    if(docValue == null) {
-      docValue = false;
-    }
+    docValue = (docValue == null) ? false : docValue;
 
     // TODO: This doesn't work yet so make it function correctly
     if(path == null) {

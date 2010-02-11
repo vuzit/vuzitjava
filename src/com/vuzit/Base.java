@@ -25,9 +25,9 @@ public abstract class Base
   /**
    * Returns the child node text value of an element.  
    */
-  protected static String childNodeValue(Element element, String childName)
+  protected static String nodeValue(Element element, String childName)
   {
-    String result = "";
+    String result = null;
 
     NodeList nameList = element.getElementsByTagName(childName);
     Element nameElement = (Element)nameList.item(0);
@@ -39,6 +39,16 @@ public abstract class Base
     }
 
     return result;
+  }
+
+  /**
+   * Returns the child node integer value of an element.  
+   */
+  protected static int nodeValueInt(Element element, String childName)
+  {
+    String text = nodeValue(element, childName);
+
+    return (text == null) ? -1 : Integer.parseInt(text);
   }
 
   /**
@@ -69,9 +79,21 @@ public abstract class Base
   }
 
   /**
+   *  Changes an array (hash table) of parameters to a URL with a default 
+   *  extension of "XML". 
+   */
+  protected static String parametersToUrl(String resource, Hashtable params, 
+                                          String id)
+  {
+    return parametersToUrl(resource, params, id, "xml");
+  }
+
+
+  /**
    *  Changes an array (hash table) of parameters to a url. 
    */
-  protected static String parametersToUrl(String resource, Hashtable params, String id)
+  protected static String parametersToUrl(String resource, Hashtable params, 
+                                          String id, String extension)
   {
     StringBuilder result = new StringBuilder();
 
@@ -80,7 +102,7 @@ public abstract class Base
     if(id != null) {
       result.append("/").append(id);
     }
-    result.append(".xml?");
+    result.append(".").append(extension).append("?");
 
     Iterator it = params.keySet().iterator();
     while (it.hasNext())
@@ -236,8 +258,8 @@ public abstract class Base
     if(errorList.getLength() > 0)
     {
       Element errorNode = (Element)errorList.item(0);
-      throw new ClientException(childNodeValue(errorNode, "msg"), 
-                                childNodeValue(errorNode, "code"));
+      throw new ClientException(nodeValue(errorNode, "msg"), 
+                                nodeValue(errorNode, "code"));
     }
   }
 

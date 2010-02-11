@@ -117,11 +117,20 @@ public class Document extends Base
   }
 
   /**
+   * Returns a URL suitable for downloading a document.  
+   */
+  public static String downloadUrl(String webId, String fileExtension)
+  {
+    java.util.Hashtable parameters = postParameters("show", webId);
+    return parametersToUrl("documents", parameters, webId, fileExtension);
+  }
+
+  /**
    * Loads a document by the web ID.  
    */
   public static Document find(String webId)
   {
-    Document result = new Document();
+    Document result = null;
 
     java.util.Hashtable parameters = postParameters("show", webId);
     String url = parametersToUrl("documents", parameters, webId);
@@ -132,19 +141,10 @@ public class Document extends Base
       connection.connect();
 
       Element element = xmlRootNode(connection.getInputStream(), "document");
-
       if(element == null) {
         throw new ClientException("Response returned incorrect XML");
       }
-
-      result.webId = childNodeValue(element, "web_id");
-      result.title = childNodeValue(element, "title");
-      result.subject = childNodeValue(element, "subject");
-      result.pageCount = Integer.parseInt(childNodeValue(element, "page_count"));
-      result.pageWidth = Integer.parseInt(childNodeValue(element, "width"));
-      result.pageHeight = Integer.parseInt(childNodeValue(element, "height"));
-      result.fileSize = Integer.parseInt(childNodeValue(element, "file_size"));
-      result.status = Integer.parseInt(childNodeValue(element, "status"));
+      result = nodeToDocument(element);
     } catch (java.io.IOException e) {
       webClientErrorCheck(connection);
     } catch (Exception e) {
@@ -221,11 +221,33 @@ public class Document extends Base
       throw new ClientException("Response returned incorrect XML");
     }
 
-    result.webId = childNodeValue(element, "web_id");
+    result.webId = nodeValue(element, "web_id");
     try {
       response.close();
     } catch(IOException ex) {
     }
+
+    return result;
+  }
+
+
+  // Private static methods
+
+  /**
+   * Converts an XML node to a Document instance. 
+   */
+  private static Document nodeToDocument(Element element)
+  {
+    Document result = new Document();
+
+    result.webId = nodeValue(element, "web_id");
+    result.title = nodeValue(element, "title");
+    result.subject = nodeValue(element, "subject");
+    result.pageCount = nodeValueInt(element, "page_count");
+    result.pageWidth = nodeValueInt(element, "width");
+    result.pageHeight = nodeValueInt(element, "height");
+    result.fileSize = nodeValueInt(element, "file_size");
+    result.status = nodeValueInt(element, "status");
 
     return result;
   }
