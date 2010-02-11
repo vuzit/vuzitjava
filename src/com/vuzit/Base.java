@@ -1,7 +1,6 @@
 
 package com.vuzit;
 
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.net.URLEncoder;
 import java.io.UnsupportedEncodingException;
@@ -82,7 +81,7 @@ public abstract class Base
    *  Changes an array (hash table) of parameters to a URL with a default 
    *  extension of "XML". 
    */
-  protected static String parametersToUrl(String resource, Hashtable params, 
+  protected static String parametersToUrl(String resource, OptionList params, 
                                           String id)
   {
     return parametersToUrl(resource, params, id, "xml");
@@ -92,7 +91,7 @@ public abstract class Base
   /**
    *  Changes an array (hash table) of parameters to a url. 
    */
-  protected static String parametersToUrl(String resource, Hashtable params, 
+  protected static String parametersToUrl(String resource, OptionList params, 
                                           String id, String extension)
   {
     StringBuilder result = new StringBuilder();
@@ -104,10 +103,9 @@ public abstract class Base
     }
     result.append(".").append(extension).append("?");
 
-    Iterator it = params.keySet().iterator();
-    while (it.hasNext())
+    for(java.util.Enumeration e = params.keys(); e.hasMoreElements() ;)
     {
-      String key = (String)it.next();
+      String key = (String)e.nextElement();
       String value = (String)params.get(key);
 
       // Do not add keys with null or empty values
@@ -132,10 +130,8 @@ public abstract class Base
   /**
    *  Returns the default HTTP post parameters array.  
    */
-  protected static Hashtable postParameters(String method, String id)
+  protected static OptionList postParameters(OptionList options, String method, String id)
   {
-    Hashtable result = new Hashtable();
-
     // The keys must be set before this can function
     if(Service.getPublicKey() == null) {
       throw new ClientException("The public key cannot be null");
@@ -144,16 +140,16 @@ public abstract class Base
       throw new ClientException("The private key cannot be null");
     }
 
-    result.put("method", method);
-    result.put("key", Service.getPublicKey());
+    options.add("method", method);
+    options.add("key", Service.getPublicKey());
 
     java.util.Date now = new java.util.Date();
     String signature = Service.signature(method, id, now);
 
-    result.put("signature", signature);
-    result.put("timestamp", Long.toString(Service.epochTime(now)));
+    options.add("signature", signature);
+    options.add("timestamp", Long.toString(Service.epochTime(now)));
 
-    return result;
+    return options;
   }
 
   /**

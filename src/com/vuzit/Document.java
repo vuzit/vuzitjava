@@ -2,11 +2,8 @@
 package com.vuzit;
 
 import java.io.IOException;
-import java.io.File;
 import java.io.InputStream;
 import java.io.FileInputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import org.w3c.dom.*;
 
 /**
@@ -89,7 +86,7 @@ public class Document extends Base
    */
   public static void destroy(String webId)
   {
-    java.util.Hashtable parameters = postParameters("destroy", webId);
+    OptionList parameters = postParameters(new OptionList(), "destroy", webId);
     String url = parametersToUrl("documents", parameters, webId);
     java.net.HttpURLConnection connection = httpConnection(url, "DELETE");
 
@@ -97,7 +94,7 @@ public class Document extends Base
     {
       connection.connect();
 
-      if(connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+      if(connection.getResponseCode() != java.net.HttpURLConnection.HTTP_OK) {
         // Check for a Vuzit returned error code
         webClientErrorCheck(connection);
 
@@ -121,7 +118,7 @@ public class Document extends Base
    */
   public static String downloadUrl(String webId, String fileExtension)
   {
-    java.util.Hashtable parameters = postParameters("show", webId);
+    OptionList parameters = postParameters(new OptionList(), "show", webId);
     return parametersToUrl("documents", parameters, webId, fileExtension);
   }
 
@@ -130,9 +127,17 @@ public class Document extends Base
    */
   public static Document find(String webId)
   {
+    return find(webId, new OptionList());
+  }
+
+  /**
+   * Loads a document by the web ID.  
+   */
+  public static Document find(String webId, OptionList options)
+  {
     Document result = null;
 
-    java.util.Hashtable parameters = postParameters("show", webId);
+    OptionList parameters = postParameters(options, "show", webId);
     String url = parametersToUrl("documents", parameters, webId);
     java.net.HttpURLConnection connection = httpConnection(url, "GET");
 
@@ -160,6 +165,41 @@ public class Document extends Base
   }
 
   /**
+   * Loads up all documents according to the query options. 
+   */
+  public static Document[] findAll(OptionList list)
+  {
+    Document[] result = null;
+
+    OptionList parameters = postParameters(list, "index", null);
+    String url = parametersToUrl("documents", parameters, null);
+    java.net.HttpURLConnection connection = httpConnection(url, "GET");
+
+    try
+    {
+      connection.connect();
+
+      Element element = xmlRootNode(connection.getInputStream(), "document");
+      if(element == null) {
+        throw new ClientException("Response returned incorrect XML");
+      }
+
+      //result = nodeToDocument(element);
+    } catch (java.io.IOException e) {
+      webClientErrorCheck(connection);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    finally
+    {
+      connection.disconnect();
+      connection = null;
+    }
+
+    return result;
+  }
+
+  /**
    * Deprecated method to load a document by the web ID.  
    */
   public static Document findById(String webId)
@@ -172,17 +212,17 @@ public class Document extends Base
    */
   public static Document upload(String path)
   {
-    return upload(path, true);
+    return upload(path, new OptionList());
   }
 
   /**
    * Uploads a document from disk via the Vuzit service.  
    */
-  public static Document upload(String path, boolean secure)
+  public static Document upload(String path, OptionList options)
   {
     Document result = null;
 
-    File file = new File(path);
+    java.io.File file = new java.io.File(path);
     FileInputStream stream = null;
 
     try {
@@ -190,7 +230,9 @@ public class Document extends Base
     } catch(java.io.FileNotFoundException e) {
       throw new ClientException("Cannot find file at path: " + path);
     }
-    result = upload(stream, null, file.getName(), secure);
+
+    options.add("file_name", file.getName());
+    result = upload(stream, options);
 
     return result;
   }
@@ -198,20 +240,24 @@ public class Document extends Base
   /**
    * Uploads a document from an InputStream via the Vuzit service.  
    */
-  public static Document upload(InputStream stream, String fileType, 
-                                String fileName, boolean secure)
+  public static Document upload(InputStream stream)
+  {
+    return upload(stream, new OptionList());
+  }
+
+  /**
+   * Uploads a document via an InputStream with options.  
+   */
+  public static Document upload(InputStream stream, OptionList options)
   {
     Document result = new Document();
 
-    if(fileName == null) {
-      fileName = "document";
+    String fileName = "document";
+    if(!options.contains("file_name")) {
+      fileName = options.get("file_name");
     }
 
-    java.util.Hashtable parameters = postParameters("create", null);
-    if(fileType != null) {
-      parameters.put("file_type", fileType);
-    }
-    parameters.put("secure", (secure) ? "1" : "0");
+    OptionList parameters = postParameters(options, "create", null);
 
     String url = parametersToUrl("documents", parameters, null);
     InputStream response = uploadFile(stream, url, "upload", null, fileName);

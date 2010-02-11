@@ -13,7 +13,7 @@ public class OptionList
    */
   public Boolean contains(String key)
   {
-    return list.contains(key);
+    return list.containsKey(key);
   }
 
   /**

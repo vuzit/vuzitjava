@@ -52,8 +52,8 @@ public class VuzitCL
    */
   private static void deleteCommand(String[] args)
   {
-    globalParametersLoad(args);
     CmdLineParser parser = parserLoad();
+    globalParametersLoad(parser, args);
     String id = lastOption(args);
 
     // TODO: This doesn't work yet so make it function correctly
@@ -73,9 +73,8 @@ public class VuzitCL
    * Loads the parameters that are global through all of the 
    * different sub-commands. 
    */
-  private static void globalParametersLoad(String[] args)
+  private static void globalParametersLoad(CmdLineParser parser, String[] args)
   {
-    CmdLineParser parser = new CmdLineParser();
     CmdLineParser.Option keys = parser.addStringOption('k', "keys");
     parseArguments(parser, args);
 
@@ -90,7 +89,7 @@ public class VuzitCL
     com.vuzit.Service.setUserAgent("VuzitCL Java 2.0.0");
 
     // service-url command
-    CmdLineParser.Option serviceUrl = parser.addStringOption('s', "service-url");
+    CmdLineParser.Option serviceUrl = parser.addStringOption('u', "service-url");
     String serviceUrlValue = (String)parser.getOptionValue(serviceUrl);
     if(serviceUrlValue != null) {
       com.vuzit.Service.setServiceUrl(serviceUrlValue);
@@ -102,8 +101,8 @@ public class VuzitCL
    */
   private static void loadCommand(String[] args)
   {
-    globalParametersLoad(args);
     CmdLineParser parser = parserLoad();
+    globalParametersLoad(parser, args);
     String id = lastOption(args);
 
     // TODO: This doesn't work yet so make it function correctly
@@ -167,6 +166,37 @@ public class VuzitCL
    */
   private static void searchCommand(String[] args)
   {
+    CmdLineParser parser = parserLoad();
+    globalParametersLoad(parser, args);
+    CmdLineParser.Option secure = parser.addStringOption('q', "query");
+    CmdLineParser.Option pdf = parser.addIntegerOption('l', "limit");
+    CmdLineParser.Option doc = parser.addIntegerOption('o', "offset");
+    parseArguments(parser, args);
+
+    com.vuzit.OptionList list = new com.vuzit.OptionList();
+
+    com.vuzit.Document document;
+    try {
+      com.vuzit.Document[] docs = com.vuzit.Document.findAll(list);
+
+      for (int i = 0; i < docs.length; i++)
+      {
+        document = docs[i];
+
+        print("LOADED: " + document.getId());
+        print("title: " + document.getTitle());
+        print("subject: " + document.getSubject());
+        print("pages: " + document.getPageCount());
+        print("width: " + document.getPageWidth());
+        print("height: " + document.getPageHeight());
+        print("size: " + document.getFileSize());
+        print("status: " + document.getStatus());
+        print("download url: " + com.vuzit.Document.downloadUrl(document.getId(), "pdf"));
+      }
+
+    } catch (ClientException ce) {
+      printError("Load failed: " + ce.getMessage());
+    }
   }
 
   /**
@@ -175,31 +205,32 @@ public class VuzitCL
   private static void uploadCommand(String[] args)
   {
     CmdLineParser parser = parserLoad();
-    globalParametersLoad(args);
-    String path = lastOption(args);
-
     CmdLineParser.Option secure = parser.addBooleanOption('s', "secure");
     CmdLineParser.Option pdf = parser.addBooleanOption('p', "download-pdf");
     CmdLineParser.Option doc = parser.addBooleanOption('d', "download-document");
+    globalParametersLoad(parser, args);
+    String path = lastOption(args);
+
     parseArguments(parser, args);
 
+    com.vuzit.OptionList options = new com.vuzit.OptionList();
     Boolean secureValue = (Boolean)parser.getOptionValue(secure);
-    secureValue = (secureValue == null) ? false : secureValue;
+    if(secureValue != null) {
+      options.add("secure", secureValue);
+    }
 
     Boolean pdfValue = (Boolean)parser.getOptionValue(pdf);
-    pdfValue = (pdfValue == null) ? false : pdfValue;
+    if(pdfValue != null) {
+      options.add("download_pdf", pdfValue);
+    }
 
     Boolean docValue = (Boolean)parser.getOptionValue(doc);
-    docValue = (docValue == null) ? false : docValue;
-
-    // TODO: This doesn't work yet so make it function correctly
-    if(path == null) {
-      printError("No path supplied");
+    if(docValue != null) {
+      options.add("download_document", docValue);
     }
 
     try {
-      // "secure" is the opposite of public
-      com.vuzit.Document document = com.vuzit.Document.upload(path, !secureValue);
+      com.vuzit.Document document = com.vuzit.Document.upload(path, options);
       print("UPLOADED: " + document.getId());
     } catch (ClientException ce) {
       printError("Upload failed: " + ce.getMessage());
@@ -313,7 +344,7 @@ public class VuzitCL
    */
   private static void printUsageSearch()
   {
-    print("search: Upload a file to Vuzit.");
+    print("search: Search for documents");
     print("usage: search [OPTIONS]");
     print("");
     print("Valid options:");
