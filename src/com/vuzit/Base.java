@@ -2,9 +2,7 @@
 package com.vuzit;
 
 import java.net.HttpURLConnection;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.DataOutputStream;
 import org.w3c.dom.*;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
@@ -92,7 +90,7 @@ public abstract class Base
       e.printStackTrace();
     } catch (java.security.KeyManagementException e) {
       e.printStackTrace();
-    } catch (IOException e) {
+    } catch (java.io.IOException e) {
       e.printStackTrace();
     }
 
@@ -184,7 +182,7 @@ public abstract class Base
   {
     InputStream result = null;
 
-    DataOutputStream dos = null;
+    java.io.DataOutputStream dos = null;
     java.io.DataInputStream inStream = null;
     String lineEnd = "\r\n";
     String twoHyphens = "--";
@@ -198,7 +196,7 @@ public abstract class Base
       contentType = "application/octet-stream";
     }
 
-    java.net.HttpURLConnection connection = httpConnection(url, "POST");
+    HttpURLConnection connection = httpConnection(url, "POST");
 
     try
     {
@@ -209,7 +207,7 @@ public abstract class Base
       // Set the timeout to 5 minutes since it's possibly a large file
       connection.setReadTimeout(5 * 60 * 1000); 
       
-      dos = new DataOutputStream(connection.getOutputStream());
+      dos = new java.io.DataOutputStream(connection.getOutputStream());
 
       dos.writeBytes(twoHyphens + boundary + lineEnd);
       dos.writeBytes("Content-Disposition: form-data; name=\"" + fileFormName + "\";"
@@ -239,12 +237,12 @@ public abstract class Base
       stream.close();
       dos.flush();
       dos.close();
-    } catch(IOException ex) {
+    } catch(java.io.IOException ex) {
     }
 
     try {
       result = connection.getInputStream();
-    } catch(IOException ex) {
+    } catch(java.io.IOException ex) {
       result = null;
     }
 

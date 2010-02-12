@@ -104,7 +104,6 @@ public class Event extends Base
     OptionList parameters = postParameters(options, "show", webId);
     parameters.add("web_id", webId);
     String url = parametersToUrl("events", parameters, null);
-    System.out.println(url);
     java.net.HttpURLConnection connection = httpConnection(url, "GET");
 
     try

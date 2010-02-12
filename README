@@ -58,6 +58,7 @@ private keys with the keys from your account.
 * Sign up for a free Vuzit account - https://ssl.vuzit.com/signup
 * Code Examples - http://wiki.github.com/vuzit/vuzitjava/code_examples
 * Vuzit API Reference - http://wiki.github.com/vuzit/vuzitjava/api_reference
+* Change log - http://wiki.github.com/vuzit/vuzitjava/change_log
 
 
 --------------------------------------------------
@@ -69,7 +70,7 @@ Find Document Example - how to load a document
   com.vuzit.Service.setPublicKey("YOUR_PUBLIC_API_KEY");  
   com.vuzit.Service.setPrivateKey("YOUR_PRIVATE_API_KEY");  
 
-  com.vuzit.Document doc = com.vuzit.Document.findById("DOCUMENT_ID");
+  com.vuzit.Document doc = com.vuzit.Document.find("DOCUMENT_ID");
 
   System.out.println("Document id: " + doc.getId());
   System.out.println("Document title: " + doc.getTitle());
