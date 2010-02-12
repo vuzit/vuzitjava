@@ -15,6 +15,7 @@ public class Document extends Base
   private String webId = null;
   private String title = null;
   private String subject = null;
+  private String excerpt = null;
   private int pageCount = -1;
   private int pageWidth = -1;
   private int pageHeight = -1;
@@ -28,6 +29,13 @@ public class Document extends Base
    */
   public String getId() {
     return webId;
+  }
+
+  /**
+   * Returns a short excerpt of the document.  
+   */
+  public String getExcerpt() {
+    return excerpt;
   }
 
   /**
@@ -172,6 +180,8 @@ public class Document extends Base
     Document[] result = null;
 
     OptionList parameters = postParameters(list, "index", null);
+    // Hard-coding to output summary for now
+    parameters.add("output", "summary");
     String url = parametersToUrl("documents", parameters, null);
     java.net.HttpURLConnection connection = httpConnection(url, "GET");
 
@@ -179,12 +189,20 @@ public class Document extends Base
     {
       connection.connect();
 
-      Element element = xmlRootNode(connection.getInputStream(), "document");
+      Element element = xmlRootNode(connection.getInputStream(), "documents");
       if(element == null) {
         throw new ClientException("Response returned incorrect XML");
       }
 
-      //result = nodeToDocument(element);
+      NodeList nameList = element.getElementsByTagName("document");
+
+      result = new Document[nameList.getLength()];
+
+      for(int i = 0; i < nameList.getLength(); i++)
+      {
+        Element node = (Element)nameList.item(i);
+        result[i] = nodeToDocument(node);
+      }
     } catch (java.io.IOException e) {
       webClientErrorCheck(connection);
     } catch (Exception e) {
@@ -289,6 +307,7 @@ public class Document extends Base
     result.webId = nodeValue(element, "web_id");
     result.title = nodeValue(element, "title");
     result.subject = nodeValue(element, "subject");
+    result.excerpt = nodeValue(element, "excerpt");
     result.pageCount = nodeValueInt(element, "page_count");
     result.pageWidth = nodeValueInt(element, "width");
     result.pageHeight = nodeValueInt(element, "height");

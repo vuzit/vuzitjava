@@ -1,16 +1,9 @@
 
 package com.vuzit;
 
-import java.util.Iterator;
-import java.net.URLEncoder;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import org.w3c.dom.*;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -29,12 +22,16 @@ public abstract class Base
     String result = null;
 
     NodeList nameList = element.getElementsByTagName(childName);
-    Element nameElement = (Element)nameList.item(0);
 
-    NodeList textList = nameElement.getChildNodes();
+    if(nameList.getLength() > 0)
+    {
+      Element nameElement = (Element)nameList.item(0);
 
-    if(textList.getLength() > 0) {
-      result = ((Node)textList.item(0)).getNodeValue().trim();
+      NodeList textList = nameElement.getChildNodes();
+
+      if(textList.getLength() > 0) {
+        result = ((Node)textList.item(0)).getNodeValue().trim();
+      }
     }
 
     return result;
@@ -58,7 +55,7 @@ public abstract class Base
     HttpURLConnection result = null;
 
     try {
-      URL address = new URL(url);
+      java.net.URL address = new java.net.URL(url);
       result = (HttpURLConnection)address.openConnection();
       result.setRequestProperty("User-agent", Service.getUserAgent());
       result.setRequestMethod(method);
@@ -66,9 +63,9 @@ public abstract class Base
       // 60 second timeout to prevent timeouts with large requests,
       // a busy server or IIS delays
       result.setReadTimeout(60 * 1000); 
-    } catch (MalformedURLException e) {
+    } catch (java.net.MalformedURLException e) {
       e.printStackTrace();
-    } catch (ProtocolException e) {
+    } catch (java.net.ProtocolException e) {
       e.printStackTrace();
     } catch (IOException e) {
       e.printStackTrace();
@@ -114,11 +111,11 @@ public abstract class Base
       {
         try {
           result.append(key).append("=");
-          value = URLEncoder.encode(value, "UTF-8"); 
+          value = java.net.URLEncoder.encode(value, "UTF-8"); 
           result.append(value);
           result.append("&");
         }
-        catch(UnsupportedEncodingException uee) {
+        catch(java.io.UnsupportedEncodingException uee) {
           System.err.println(uee);
         }
       }
@@ -144,7 +141,7 @@ public abstract class Base
     options.add("key", Service.getPublicKey());
 
     java.util.Date now = new java.util.Date();
-    String signature = Service.signature(method, id, now);
+    String signature = Service.signature(method, id, now, options);
 
     options.add("signature", signature);
     options.add("timestamp", Long.toString(Service.epochTime(now)));
@@ -163,7 +160,7 @@ public abstract class Base
     InputStream result = null;
 
     DataOutputStream dos = null;
-    DataInputStream inStream = null;
+    java.io.DataInputStream inStream = null;
     String lineEnd = "\r\n";
     String twoHyphens = "--";
     String boundary =  "*****";

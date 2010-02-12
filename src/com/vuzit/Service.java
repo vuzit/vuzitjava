@@ -101,6 +101,15 @@ public class Service
     */
    public static String signature(String service, String id, Date date)
    {
+     return signature(service, id, date, new OptionList());
+   }
+
+   /**
+    * Returns a valid Vuzit request signature.  
+    */
+   public static String signature(String service, String id, 
+                                  Date date, OptionList options)
+   {
      String result;
 
      if(id == null) {
@@ -112,6 +121,18 @@ public class Service
      }
 
      String msg = service + id + publicKey + epochTime(date);
+
+     String[] optionsList = new String[] { "included_pages", 
+                                           "watermark", 
+                                           "query" };
+
+     for(int i = 0; i < optionsList.length; i++) {
+       String item = optionsList[i];
+       if (options.contains(item)) {
+         msg += options.get(item);
+       }
+     }
+
 
      try {
        result = calculateRFC2104HMAC(msg, privateKey);

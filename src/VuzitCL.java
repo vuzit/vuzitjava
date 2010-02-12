@@ -167,31 +167,45 @@ public class VuzitCL
   private static void searchCommand(String[] args)
   {
     CmdLineParser parser = parserLoad();
+    CmdLineParser.Option query = parser.addStringOption('q', "query");
+    CmdLineParser.Option limit = parser.addStringOption('l', "limit");
+    CmdLineParser.Option offset = parser.addStringOption('o', "offset");
     globalParametersLoad(parser, args);
-    CmdLineParser.Option secure = parser.addStringOption('q', "query");
-    CmdLineParser.Option pdf = parser.addIntegerOption('l', "limit");
-    CmdLineParser.Option doc = parser.addIntegerOption('o', "offset");
     parseArguments(parser, args);
 
     com.vuzit.OptionList list = new com.vuzit.OptionList();
+
+    String queryValue = (String)parser.getOptionValue(query);
+    if(queryValue != null) {
+      list.add("query", queryValue);
+    }
+
+    String limitValue = (String)parser.getOptionValue(limit);
+    if(limitValue != null) {
+      list.add("limit", limitValue);
+    }
+
+    String offsetValue = (String)parser.getOptionValue(offset);
+    if(offsetValue != null) {
+      list.add("offset", offsetValue);
+    }
 
     com.vuzit.Document document;
     try {
       com.vuzit.Document[] docs = com.vuzit.Document.findAll(list);
 
+      print(docs.length + " documents found");
+
       for (int i = 0; i < docs.length; i++)
       {
         document = docs[i];
 
-        print("LOADED: " + document.getId());
+        print("LOADED [" + (i + 1) + "]: " + document.getId());
         print("title: " + document.getTitle());
-        print("subject: " + document.getSubject());
         print("pages: " + document.getPageCount());
-        print("width: " + document.getPageWidth());
-        print("height: " + document.getPageHeight());
         print("size: " + document.getFileSize());
-        print("status: " + document.getStatus());
-        print("download url: " + com.vuzit.Document.downloadUrl(document.getId(), "pdf"));
+        print("excerpt: " + document.getExcerpt());
+        print("");
       }
 
     } catch (ClientException ce) {
