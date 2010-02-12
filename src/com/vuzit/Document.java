@@ -1,7 +1,6 @@
 
 package com.vuzit;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileInputStream;
 import org.w3c.dom.*;
@@ -288,7 +287,7 @@ public class Document extends Base
     result.webId = nodeValue(element, "web_id");
     try {
       response.close();
-    } catch(IOException ex) {
+    } catch(java.io.IOException ex) {
     }
 
     return result;

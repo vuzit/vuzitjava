@@ -27,6 +27,9 @@ public class VuzitCL
     if(command.equals("upload")) {
       uploadCommand(args);
     }
+    if(command.equals("event")) {
+      eventCommand(args);
+    }
     else if (command.equals("help")) {
       helpCommand(args);
     }
@@ -66,6 +69,78 @@ public class VuzitCL
       System.out.println("DELETED: " + id);
     } catch (ClientException ce) {
       printError("Delete failed: " + ce.getMessage());
+    }
+  }
+
+  /**
+   * Runs the event command.
+   */
+  private static void eventCommand(String[] args)
+  {
+    CmdLineParser parser = parserLoad();
+    CmdLineParser.Option eventOption = parser.addStringOption('e', "event");
+    CmdLineParser.Option custom = parser.addStringOption('c', "custom");
+    CmdLineParser.Option limit = parser.addStringOption('l', "limit");
+    CmdLineParser.Option offset = parser.addStringOption('o', "offset");
+    globalParametersLoad(parser, args);
+    parseArguments(parser, args);
+    String id = lastOption(args);
+
+    com.vuzit.OptionList list = new com.vuzit.OptionList();
+
+    String eventValue = (String)parser.getOptionValue(eventOption);
+    if(eventValue != null) {
+      list.add("event", eventValue);
+    }
+
+    String customValue = (String)parser.getOptionValue(custom);
+    if(customValue != null) {
+      list.add("custom", customValue);
+    }
+
+    String limitValue = (String)parser.getOptionValue(limit);
+    if(limitValue != null) {
+      list.add("limit", limitValue);
+    }
+
+    String offsetValue = (String)parser.getOptionValue(offset);
+    if(offsetValue != null) {
+      list.add("offset", offsetValue);
+    }
+
+    com.vuzit.Event event;
+    try {
+      com.vuzit.Event[] events = com.vuzit.Event.findAll(id, list);
+
+      print(events.length + " events found");
+
+      java.text.SimpleDateFormat format = new 
+                 java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+      for (int i = 0; i < events.length; i++)
+      {
+        event = events[i];
+
+        System.out.print("[" + format.format(event.getRequestedAt()) + "] ");
+
+        if(event.getEvent().equals("page_view")) {
+          System.out.print(event.getDuration() + "s - ");
+        }
+        System.out.print(event.getEvent());
+
+        if(event.getPage() != -1) {
+          System.out.print(", p" + event.getPage());
+        }
+        if(event.getCustom() != null) {
+          System.out.print(" (" + event.getCustom() + ")");
+        }
+        System.out.print(" - " + event.getReferer().substring(8, 13));
+        System.out.print(" - " + event.getRemoteHost());
+        print(" - " + event.getUserAgent().substring(0, 8));
+      }
+
+    } catch (ClientException ce) {
+      printError("Load failed: " + ce.getMessage());
     }
   }
 
@@ -156,7 +231,7 @@ public class VuzitCL
   {
     CmdLineParser parser = new CmdLineParser();
     CmdLineParser.Option keys = parser.addStringOption('k', "keys");
-    CmdLineParser.Option serviceUrl = parser.addStringOption('s', "service-url");
+    CmdLineParser.Option serviceUrl = parser.addStringOption('u', "service-url");
 
     return parser;
   }
@@ -264,6 +339,9 @@ public class VuzitCL
     if(option.equals("upload")) {
       printUsageUpload();
     }
+    if(option.equals("event")) {
+      printUsageEvent();
+    }
     else if(option.equals("load")) {
       printUsageLoad();
     }
@@ -311,6 +389,23 @@ public class VuzitCL
   }
 
   /**
+   * Prints event usage flags. 
+   */
+  private static void printUsageEvent()
+  {
+    print("event: Load document event statistics");
+    print("usage: event [OPTIONS] WEB_ID");
+    print("");
+    print("Valid options:");
+    print("  -e, --event         Event type to load");
+    print("  -c, --custom        Custom value to load");
+    print("  -l, --limit         Limits the number of results");
+    print("  -o, --offst         Offset the results at this number");
+    print("");
+    printUsageGlobal();
+  }
+
+  /**
    * Prints the general usage flags. 
    */
   private static void printUsageGeneral()
@@ -323,6 +418,7 @@ public class VuzitCL
     print("Available sub-commands:");
     print("");
     print("  delete");
+    print("  event");
     print("  load");
     print("  search");
     print("  upload");

@@ -48,6 +48,16 @@ public abstract class Base
   }
 
   /**
+   * Returns the child node long value of an element.  
+   */
+  protected static long nodeValueLong(Element element, String childName)
+  {
+    String text = nodeValue(element, childName);
+
+    return (text == null) ? -1 : Long.parseLong(text);
+  }
+
+  /**
    * Returns a HTTP connection based upon the URL and request method.  
    */
   protected static HttpURLConnection httpConnection(String url, String method)
@@ -56,7 +66,18 @@ public abstract class Base
 
     try {
       java.net.URL address = new java.net.URL(url);
+
+      // Set the SSL parameters if needed
+      if(url.startsWith("https://")) {
+        com.vuzit.TrustManager xtm = new com.vuzit.TrustManager();
+        TrustManager tm[] = { xtm };
+        javax.net.ssl.SSLContext ctx = javax.net.ssl.SSLContext.getInstance("SSL");
+        ctx.init(null, tm, null);
+        javax.net.ssl.SSLSocketFactory sf = ctx.getSocketFactory();
+        javax.net.ssl.HttpsURLConnection.setDefaultSSLSocketFactory(sf);
+      }
       result = (HttpURLConnection)address.openConnection();
+
       result.setRequestProperty("User-agent", Service.getUserAgent());
       result.setRequestMethod(method);
       result.setDoOutput(true);
@@ -66,6 +87,10 @@ public abstract class Base
     } catch (java.net.MalformedURLException e) {
       e.printStackTrace();
     } catch (java.net.ProtocolException e) {
+      e.printStackTrace();
+    } catch (java.security.NoSuchAlgorithmException e) {
+      e.printStackTrace();
+    } catch (java.security.KeyManagementException e) {
       e.printStackTrace();
     } catch (IOException e) {
       e.printStackTrace();
