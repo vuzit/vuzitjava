@@ -103,7 +103,7 @@ public class Event extends Base
 
     OptionList parameters = postParameters(options, "show", webId);
     parameters.add("web_id", webId);
-    String url = parametersToUrl("events", parameters, null);
+    String url = parametersToUrl("events.xml", parameters);
     java.net.HttpURLConnection connection = httpConnection(url, "GET");
 
     try

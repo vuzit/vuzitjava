@@ -94,7 +94,7 @@ public class Document extends Base
   public static void destroy(String webId)
   {
     OptionList parameters = postParameters(new OptionList(), "destroy", webId);
-    String url = parametersToUrl("documents", parameters, webId);
+    String url = parametersToUrl("documents/" + webId + ".xml", parameters);
     java.net.HttpURLConnection connection = httpConnection(url, "DELETE");
 
     try
@@ -126,7 +126,7 @@ public class Document extends Base
   public static String downloadUrl(String webId, String fileExtension)
   {
     OptionList parameters = postParameters(new OptionList(), "show", webId);
-    return parametersToUrl("documents", parameters, webId, fileExtension);
+    return parametersToUrl("documents/" + webId + "." + fileExtension, parameters);
   }
 
   /**
@@ -145,7 +145,7 @@ public class Document extends Base
     Document result = null;
 
     OptionList parameters = postParameters(options, "show", webId);
-    String url = parametersToUrl("documents", parameters, webId);
+    String url = parametersToUrl("documents/" + webId + ".xml", parameters);
     java.net.HttpURLConnection connection = httpConnection(url, "GET");
 
     try
@@ -181,7 +181,7 @@ public class Document extends Base
     OptionList parameters = postParameters(list, "index", null);
     // Hard-coding to output summary for now
     parameters.add("output", "summary");
-    String url = parametersToUrl("documents", parameters, null);
+    String url = parametersToUrl("documents.xml", parameters);
     java.net.HttpURLConnection connection = httpConnection(url, "GET");
 
     try
@@ -276,7 +276,7 @@ public class Document extends Base
 
     OptionList parameters = postParameters(options, "create", null);
 
-    String url = parametersToUrl("documents", parameters, null);
+    String url = parametersToUrl("documents.xml", parameters);
     InputStream response = uploadFile(stream, url, "upload", null, fileName);
 
     Element element = xmlRootNode(response, "document");

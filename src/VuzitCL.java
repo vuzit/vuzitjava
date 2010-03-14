@@ -36,6 +36,9 @@ public class VuzitCL
     else if (command.equals("load")) {
       loadCommand(args);
     }
+    else if (command.equals("page")) {
+      pageCommand(args);
+    }
     else if (command.equals("search")) {
       searchCommand(args);
     }
@@ -134,7 +137,9 @@ public class VuzitCL
         if(event.getCustom() != null) {
           System.out.print(" (" + event.getCustom() + ")");
         }
-        System.out.print(" - " + event.getReferer().substring(8, 13));
+        if(event.getReferer() != null) {
+          System.out.print(" - " + event.getReferer().substring(8, 13));
+        }
         System.out.print(" - " + event.getRemoteHost());
         print(" - " + event.getUserAgent().substring(0, 8));
       }
@@ -209,6 +214,63 @@ public class VuzitCL
   private static String lastOption(String[] args)
   {
     return args[args.length - 1];
+  }
+
+  /**
+   * Runs the page command.
+   */
+  private static void pageCommand(String[] args)
+  {
+    String id = lastOption(args);
+
+    // TODO: This doesn't work yet so make it function correctly
+    if(id == null) {
+      printError("No ID supplied");
+    }
+
+    CmdLineParser parser = parserLoad();
+    CmdLineParser.Option included = parser.addStringOption('i', "included");
+    CmdLineParser.Option limit = parser.addStringOption('l', "limit");
+    CmdLineParser.Option offset = parser.addStringOption('o', "offset");
+    globalParametersLoad(parser, args);
+    parseArguments(parser, args);
+
+    com.vuzit.OptionList list = new com.vuzit.OptionList();
+
+    String includedValue = (String)parser.getOptionValue(included);
+    if(includedValue != null) {
+      list.add("included_pages", includedValue);
+    }
+
+    String limitValue = (String)parser.getOptionValue(limit);
+    if(limitValue != null) {
+      list.add("limit", limitValue);
+    }
+
+    String offsetValue = (String)parser.getOptionValue(offset);
+    if(offsetValue != null) {
+      list.add("offset", offsetValue);
+    }
+
+    com.vuzit.Page page;
+    try {
+      com.vuzit.Page[] pages = com.vuzit.Page.findAll(id, list);
+
+      for (int i = 0; i < pages.length; i++)
+      {
+        page = pages[i];
+
+        print("Page: " + page.getNumber());
+        print(page.getText());
+        print("");
+      }
+
+      print("");
+      print(pages.length + " pages found");
+
+    } catch (ClientException ce) {
+      printError("Load failed: " + ce.getMessage());
+    }
   }
 
   /**
@@ -339,7 +401,7 @@ public class VuzitCL
     if(option.equals("upload")) {
       printUsageUpload();
     }
-    if(option.equals("event")) {
+    else if(option.equals("event")) {
       printUsageEvent();
     }
     else if(option.equals("load")) {
@@ -350,6 +412,9 @@ public class VuzitCL
     }
     else if(option.equals("search")) {
       printUsageSearch();
+    }
+    else if(option.equals("page")) {
+      printUsagePage();
     }
     else {
       print("Unknown option: " + option);
@@ -420,6 +485,7 @@ public class VuzitCL
     print("  delete");
     print("  event");
     print("  load");
+    print("  page");
     print("  search");
     print("  upload");
     print("  help");
@@ -445,6 +511,22 @@ public class VuzitCL
     print("");
     print("Valid options:");
     print("  none");
+    print("");
+    printUsageGlobal();
+  }
+
+  /**
+   * Prints page usage flags. 
+   */
+  private static void printUsagePage()
+  {
+    print("page: Loads page text for a document");
+    print("usage: page [OPTIONS] WEB_ID");
+    print("");
+    print("Valid options:");
+    print("  -i, --included                 Set range of pages to load (e.g '5,10-19')");
+    print("  -l, --limit                    Limits the results to a number");
+    print("  -o, --offset                   Offsets the results at this number");
     print("");
     printUsageGlobal();
   }

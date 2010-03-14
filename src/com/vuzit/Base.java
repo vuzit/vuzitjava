@@ -98,30 +98,14 @@ public abstract class Base
   }
 
   /**
-   *  Changes an array (hash table) of parameters to a URL with a default 
-   *  extension of "XML". 
+   * Converts a set of parameters to a URL. 
    */
-  protected static String parametersToUrl(String resource, OptionList params, 
-                                          String id)
-  {
-    return parametersToUrl(resource, params, id, "xml");
-  }
-
-
-  /**
-   *  Changes an array (hash table) of parameters to a url. 
-   */
-  protected static String parametersToUrl(String resource, OptionList params, 
-                                          String id, String extension)
+  protected static String parametersToUrl(String baseUrl, OptionList params)
   {
     StringBuilder result = new StringBuilder();
 
-    result.append(Service.getServiceUrl()).append("/").append(resource);
-
-    if(id != null) {
-      result.append("/").append(id);
-    }
-    result.append(".").append(extension).append("?");
+    result.append(Service.getServiceUrl()).append("/");
+    result.append(baseUrl).append("?");
 
     for(java.util.Enumeration e = params.keys(); e.hasMoreElements() ;)
     {
