@@ -24,10 +24,14 @@ public class VuzitCL
 
     String command = args[0];
 
+    if(command.equals("--version")) {
+      printVersion();
+    }
+
     if(command.equals("upload")) {
       uploadCommand(args);
     }
-    if(command.equals("event")) {
+    else if(command.equals("event")) {
       eventCommand(args);
     }
     else if (command.equals("help")) {
@@ -307,6 +311,7 @@ public class VuzitCL
     CmdLineParser.Option query = parser.addStringOption('q', "query");
     CmdLineParser.Option limit = parser.addStringOption('l', "limit");
     CmdLineParser.Option offset = parser.addStringOption('o', "offset");
+    CmdLineParser.Option output = parser.addStringOption('O', "output");
     globalParametersLoad(parser, args);
     parseArguments(parser, args);
 
@@ -327,6 +332,11 @@ public class VuzitCL
       list.add("offset", offsetValue);
     }
 
+    String outputValue = (String)parser.getOptionValue(output);
+    if(outputValue != null) {
+      list.add("output", outputValue);
+    }
+
     com.vuzit.Document document;
     try {
       com.vuzit.Document[] docs = com.vuzit.Document.findAll(list);
@@ -338,11 +348,14 @@ public class VuzitCL
         document = docs[i];
 
         print("LOADED [" + (i + 1) + "]: " + document.getId());
-        print("title: " + document.getTitle());
-        print("pages: " + document.getPageCount());
-        print("size: " + document.getFileSize());
-        print("excerpt: " + document.getExcerpt());
-        print("");
+
+        if(document.getPageCount() != -1) {
+          print("title: " + document.getTitle());
+          print("pages: " + document.getPageCount());
+          print("size: " + document.getFileSize());
+          print("excerpt: " + document.getExcerpt());
+          print("");
+        }
       }
 
     } catch (ClientException ce) {
@@ -356,28 +369,28 @@ public class VuzitCL
   private static void uploadCommand(String[] args)
   {
     CmdLineParser parser = parserLoad();
-    CmdLineParser.Option secure = parser.addBooleanOption('s', "secure");
-    CmdLineParser.Option pdf = parser.addBooleanOption('p', "download-pdf");
-    CmdLineParser.Option doc = parser.addBooleanOption('d', "download-document");
+    CmdLineParser.Option secure = parser.addStringOption('s', "secure");
+    CmdLineParser.Option pdf = parser.addStringOption('p', "download-pdf");
+    CmdLineParser.Option doc = parser.addStringOption('d', "download-document");
     globalParametersLoad(parser, args);
     String path = lastOption(args);
 
     parseArguments(parser, args);
 
     com.vuzit.OptionList options = new com.vuzit.OptionList();
-    Boolean secureValue = (Boolean)parser.getOptionValue(secure);
+    String secureValue = (String)parser.getOptionValue(secure);
     if(secureValue != null) {
-      options.add("secure", secureValue);
+      options.add("secure", true);
     }
 
-    Boolean pdfValue = (Boolean)parser.getOptionValue(pdf);
-    if(pdfValue != null) {
-      options.add("download_pdf", pdfValue);
-    }
-
-    Boolean docValue = (Boolean)parser.getOptionValue(doc);
+    String docValue = (String)parser.getOptionValue(doc);
     if(docValue != null) {
-      options.add("download_document", docValue);
+      options.add("download_document", true);
+    }
+
+    String pdfValue = (String)parser.getOptionValue(pdf);
+    if(pdfValue != null) {
+      options.add("download_pdf", true);
     }
 
     try {
@@ -475,10 +488,11 @@ public class VuzitCL
    */
   private static void printUsageGeneral()
   {
-    print("VuzitCL - Vuzit Command Line");
+    printVersion();
     print("Usage: vuzitcl -k PUBLIC_KEY,PRIVATE_KEY [OPTIONS]");
     print("");
     print("Type 'vuzitcl help <subcommand>' for help on a specific subcommand.");
+    print("Type 'vuzitcl --version' to see the program version");
     print("");
     print("Available sub-commands:");
     print("");
@@ -541,8 +555,9 @@ public class VuzitCL
     print("");
     print("Valid options:");
     print("  -q, --query         Query keywords");
-    print("  -l, --limit         Limits the results to a number");
     print("  -o, --offset        Offsets the results at this number");
+    print("  -l, --limit         Limits the results to a number");
+    print("  -O, --output        Output more document info including title and excerpt");
     print("");
     printUsageGlobal();
   }
@@ -561,5 +576,13 @@ public class VuzitCL
     print("  -d, --download-document        Make the original document downloadable");
     print("");
     printUsageGlobal();
+  }
+
+  /**
+   * Prints the version number.  
+   */
+  private static void printVersion()
+  {
+    print("Vuzit Command Line - " + com.vuzit.Service.getUserAgent());
   }
 }

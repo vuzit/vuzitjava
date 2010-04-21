@@ -34,6 +34,9 @@ public class Page extends Base
    */
   public static Page[] findAll(String webId, OptionList options)
   {
+    if(webId == null) {
+      throw new ClientException("webId cannot be null");
+    }
     Page[] result = null;
 
     OptionList parameters = postParameters(options, "index", webId);

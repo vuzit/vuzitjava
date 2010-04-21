@@ -99,6 +99,9 @@ public class Event extends Base
    */
   public static Event[] findAll(String webId, OptionList options)
   {
+    if(webId == null) {
+      throw new ClientException("webId cannot be null");
+    }
     Event[] result = null;
 
     OptionList parameters = postParameters(options, "show", webId);

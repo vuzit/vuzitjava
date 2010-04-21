@@ -93,6 +93,9 @@ public class Document extends Base
    */
   public static void destroy(String webId)
   {
+    if(webId == null) {
+      throw new ClientException("webId cannot be null");
+    }
     OptionList parameters = postParameters(new OptionList(), "destroy", webId);
     String url = parametersToUrl("documents/" + webId + ".xml", parameters);
     java.net.HttpURLConnection connection = httpConnection(url, "DELETE");
@@ -125,6 +128,9 @@ public class Document extends Base
    */
   public static String downloadUrl(String webId, String fileExtension)
   {
+    if(webId == null) {
+      throw new ClientException("webId cannot be null");
+    }
     OptionList parameters = postParameters(new OptionList(), "show", webId);
     return parametersToUrl("documents/" + webId + "." + fileExtension, parameters);
   }
@@ -143,6 +149,10 @@ public class Document extends Base
   public static Document find(String webId, OptionList options)
   {
     Document result = null;
+
+    if(webId == null) {
+      throw new ClientException("webId cannot be null");
+    }
 
     OptionList parameters = postParameters(options, "show", webId);
     String url = parametersToUrl("documents/" + webId + ".xml", parameters);
@@ -179,8 +189,6 @@ public class Document extends Base
     Document[] result = null;
 
     OptionList parameters = postParameters(list, "index", null);
-    // Hard-coding to output summary for now
-    parameters.add("output", "summary");
     String url = parametersToUrl("documents.xml", parameters);
     java.net.HttpURLConnection connection = httpConnection(url, "GET");
 
@@ -267,6 +275,9 @@ public class Document extends Base
    */
   public static Document upload(InputStream stream, OptionList options)
   {
+    if(stream == null) {
+      throw new ClientException("stream cannot be null");
+    }
     Document result = new Document();
 
     String fileName = "document";
