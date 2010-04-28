@@ -170,7 +170,7 @@ public class VuzitCL
     String[] keyList = keyValues.split(",");
     com.vuzit.Service.setPublicKey(keyList[0]);
     com.vuzit.Service.setPrivateKey(keyList[1]);
-    com.vuzit.Service.setUserAgent("VuzitCL Java 2.0.0");
+    com.vuzit.Service.setUserAgent("VuzitCL Java 2.2.0");
 
     // service-url command
     CmdLineParser.Option serviceUrl = parser.addStringOption('u', "service-url");

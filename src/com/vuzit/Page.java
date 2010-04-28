@@ -30,6 +30,14 @@ public class Page extends Base
   // Public static methods
 
   /**
+   * Loads up all pages. 
+   */
+  public static Page[] findAll(String webId)
+  {
+    return findAll(webId, new OptionList());
+  }
+
+  /**
    * Loads up all events according to the query options. 
    */
   public static Page[] findAll(String webId, OptionList options)

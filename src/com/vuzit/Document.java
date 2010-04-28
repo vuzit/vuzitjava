@@ -182,6 +182,14 @@ public class Document extends Base
   }
 
   /**
+   * Loads up all documents. 
+   */
+  public static Document[] findAll()
+  {
+    return findAll(new OptionList());
+  }
+
+  /**
    * Loads up all documents according to the query options. 
    */
   public static Document[] findAll(OptionList list)
